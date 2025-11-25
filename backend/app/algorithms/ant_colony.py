@@ -9,94 +9,113 @@ from .geometry import calculate_distance, normalize_path
 
 
 def solve_ant_colony(cities: List[City]) -> List[int]:
+    """Solve TSP with Ant Colony Optimization and return ordered city IDs."""
+
     if len(cities) < 2:
         return [city.id for city in cities]
 
+    # Tunable parameters
     num_ants = min(20, len(cities))
     max_iterations = 50
-    alpha = 1
-    beta = 3
+    alpha = 1  # pheromone influence
+    beta = 3  # heuristic (distance) influence
     evaporation = 0.1
     q = 100
 
     n = len(cities)
     pheromones = [[1.0 for _ in range(n)] for _ in range(n)]
 
-    dists = [[0.0 for _ in range(n)] for _ in range(n)]
-    for i in range(n):
-        for j in range(n):
-            dists[i][j] = calculate_distance(cities[i], cities[j])
+    def build_distance_matrix() -> List[List[float]]:
+        matrix = [[0.0 for _ in range(n)] for _ in range(n)]
+        for i in range(n):
+            for j in range(n):
+                matrix[i][j] = calculate_distance(cities[i], cities[j])
+        return matrix
 
+    dists = build_distance_matrix()
     index_to_id = {i: city.id for i, city in enumerate(cities)}
-
     best_path: List[int] = []
     best_distance = math.inf
+
+    def path_distance(path: List[int]) -> float:
+        total = 0.0
+        for idx in range(n - 1):
+            total += dists[path[idx]][path[idx + 1]]
+        total += dists[path[-1]][path[0]]
+        return total
+
+    def choose_next_city(current: int, visited: set[int]) -> int:
+        candidates: List[int] = []
+        weights: List[float] = []
+
+        for next_city in range(n):
+            if next_city in visited:
+                continue
+            tau = pheromones[current][next_city] ** alpha
+            distance = dists[current][next_city] or 0.1
+            eta = (1.0 / distance) ** beta
+            probability = tau * eta
+            candidates.append(next_city)
+            weights.append(probability)
+
+        if not candidates:
+            return current
+
+        total_weight = sum(weights)
+        if total_weight == 0:
+            return random.choice(candidates)
+
+        threshold = random.random() * total_weight
+        for candidate, weight in zip(candidates, weights):
+            threshold -= weight
+            if threshold <= 0:
+                return candidate
+        return candidates[-1]
+
+    def construct_path() -> List[int]:
+        visited: set[int] = set()
+        current = random.randrange(n)
+        path = [current]
+        visited.add(current)
+
+        while len(path) < n:
+            current = choose_next_city(current, visited)
+            path.append(current)
+            visited.add(current)
+        return path
+
+    def evaporate_pheromones() -> None:
+        for i in range(n):
+            for j in range(n):
+                pheromones[i][j] *= (1 - evaporation)
+
+    def deposit_pheromones(path: List[int], total: float) -> None:
+        deposit = q / total if total else 0
+        for idx in range(n - 1):
+            a, b = path[idx], path[idx + 1]
+            pheromones[a][b] += deposit
+            pheromones[b][a] += deposit
+        a, b = path[-1], path[0]
+        pheromones[a][b] += deposit
+        pheromones[b][a] += deposit
 
     for _ in range(max_iterations):
         all_paths: List[List[int]] = []
         all_distances: List[float] = []
 
         for _ in range(num_ants):
-            visited = set()
-            current = random.randrange(n)
-            path = [current]
-            visited.add(current)
-
-            while len(visited) < n:
-                probs = []
-                candidates = []
-                prob_sum = 0.0
-
-                for next_city in range(n):
-                    if next_city in visited:
-                        continue
-
-                    tau = pheromones[current][next_city] ** alpha
-                    distance = dists[current][next_city] or 0.1
-                    eta = (1.0 / distance) ** beta
-                    probability = tau * eta
-                    probs.append(probability)
-                    candidates.append(next_city)
-                    prob_sum += probability
-
-                if prob_sum == 0:
-                    remaining = [i for i in range(n) if i not in visited]
-                    next_city = random.choice(remaining)
-                else:
-                    r = random.random() * prob_sum
-                    next_city = candidates[-1]
-                    for idx, candidate in enumerate(candidates):
-                        r -= probs[idx]
-                        if r <= 0:
-                            next_city = candidate
-                            break
-
-                path.append(next_city)
-                visited.add(next_city)
-                current = next_city
-
+            path = construct_path()
+            total = path_distance(path)
             all_paths.append(path)
-            total = 0.0
-            for i in range(n - 1):
-                total += dists[path[i]][path[i + 1]]
-            total += dists[path[-1]][path[0]]
             all_distances.append(total)
 
             if total < best_distance:
                 best_distance = total
                 best_path = path[:]
 
-        for i in range(n):
-            for j in range(n):
-                pheromones[i][j] *= (1 - evaporation)
-
+        evaporate_pheromones()
         for path, total in zip(all_paths, all_distances):
-            deposit = q / total if total else 0
-            for i in range(n - 1):
-                pheromones[path[i]][path[i + 1]] += deposit
-                pheromones[path[i + 1]][path[i]] += deposit
-            pheromones[path[-1]][path[0]] += deposit
-            pheromones[path[0]][path[-1]] += deposit
+            deposit_pheromones(path, total)
 
     result = [index_to_id[idx] for idx in best_path]
     if cities:
