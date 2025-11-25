@@ -1,51 +1,58 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Tuple
 
 from ..schemas import City
 from .geometry import normalize_path
 
+GRID_SIZE = 4096
 
-def _rot(n: int, x: int, y: int, rx: int, ry: int) -> tuple[int, int]:
+
+def _rotate_quadrant(size: int, x: int, y: int, rx: int, ry: int) -> Tuple[int, int]:
+    """Rotate a quadrant to follow the Hilbert curve ordering."""
     if ry == 0:
         if rx == 1:
-            x = n - 1 - x
-            y = n - 1 - y
+            x = size - 1 - x
+            y = size - 1 - y
         x, y = y, x
     return x, y
 
 
-def _xy2d(n: int, x: int, y: int) -> int:
-    rx = ry = s = 0
+def _hilbert_distance(size: int, x: int, y: int) -> int:
+    """Map 2D grid coordinates to 1D Hilbert curve distance."""
     d = 0
-    s = n // 2
-    while s > 0:
-        rx = 1 if (x & s) > 0 else 0
-        ry = 1 if (y & s) > 0 else 0
-        d += s * s * ((3 * rx) ^ ry)
-        x, y = _rot(s, x, y, rx, ry)
-        s //= 2
+    step = size // 2
+    while step > 0:
+        rx = 1 if (x & step) else 0
+        ry = 1 if (y & step) else 0
+        d += step * step * ((3 * rx) ^ ry)
+        x, y = _rotate_quadrant(step, x, y, rx, ry)
+        step //= 2
     return d
 
 
+def _normalize_coords(city: City, max_val: float) -> tuple[int, int]:
+    scale = GRID_SIZE - 1
+    nx = int((city.x / max_val) * scale)
+    ny = int((city.y / max_val) * scale)
+    return nx, ny
+
+
 def solve_space_filling_curve(cities: List[City]) -> List[int]:
+    """Order cities by Hilbert curve to approximate a short tour."""
+
     if not cities:
         return []
 
-    grid_size = 4096
-    max_x = max(max(city.x for city in cities), 1)
-    max_y = max(max(city.y for city in cities), 1)
-    max_val = max(max_x, max_y)
+    max_coord = max(max(city.x for city in cities), max(city.y for city in cities), 1)
 
     enriched = []
     for city in cities:
-        nx = int((city.x / max_val) * (grid_size - 1))
-        ny = int((city.y / max_val) * (grid_size - 1))
-        enriched.append({"id": city.id, "hilbert": _xy2d(grid_size, nx, ny)})
+        nx, ny = _normalize_coords(city, max_coord)
+        hilbert_value = _hilbert_distance(GRID_SIZE, nx, ny)
+        enriched.append((hilbert_value, city.id))
 
-    enriched.sort(key=lambda c: c["hilbert"])
-    path = [c["id"] for c in enriched]
-    if cities:
-        return normalize_path(path, cities[0].id)
-    return path
+    enriched.sort(key=lambda item: item[0])
+    path = [city_id for _, city_id in enriched]
+    return normalize_path(path, cities[0].id)
 
