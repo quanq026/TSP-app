@@ -5,16 +5,22 @@ from typing import List
 
 from .schemas import City
 
+PADDING = 30
+
 
 def generate_random_cities(count: int, width: int, height: int) -> List[City]:
-    padding = 30
-    safe_width = max(width - padding * 2, 1)
-    safe_height = max(height - padding * 2, 1)
+    """Create `count` pseudo-random cities within a padded rectangle."""
+
+    safe_width = max(width - PADDING * 2, 1)
+    safe_height = max(height - PADDING * 2, 1)
+
+    def random_coord(range_size: int) -> float:
+        return random.random() * range_size + PADDING
 
     cities: List[City] = []
     for idx in range(count):
-        x = random.random() * safe_width + padding
-        y = random.random() * safe_height + padding
+        x = random_coord(safe_width)
+        y = random_coord(safe_height)
         cities.append(City(id=idx, x=x, y=y))
     return cities
 

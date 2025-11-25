@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Canvas from './components/Canvas';
 import ControlPanel from './components/ControlPanel';
 import AnalysisModal from './components/AnalysisModal';
@@ -6,6 +6,12 @@ import { City, AlgorithmType, AnalysisResult, Language } from './types';
 import { translations } from './utils/translations';
 import { fetchRandomCities, solveTsp, analyzeAlgorithms } from './utils/api';
 import { getTotalDistance } from './utils/geometry';
+
+const DEFAULT_CANVAS_SIZE = { width: 800, height: 600 };
+const MIN_DIMENSION = 100;
+const STEP_DELAY_MS = 50;
+
+const ensureMinDimension = (value: number) => Math.max(value, MIN_DIMENSION);
 
 const App: React.FC = () => {
   const [cities, setCities] = useState<City[]>([]);
@@ -22,51 +28,58 @@ const App: React.FC = () => {
   const timerRef = useRef<number | null>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
-  const t = translations[language];
+  const t = useMemo(() => translations[language], [language]);
+  const isBusy = isRunning || isComputing;
 
-  const handleCanvasClick = useCallback((x: number, y: number) => {
-    const newCity: City = {
-      id: Date.now(),
-      x,
-      y
-    };
-    setCities(prev => [...prev, newCity]);
+  const resetRunState = useCallback(() => {
     setPath([]);
     setIsRunning(false);
   }, []);
 
-  const handleRandomize = useCallback(async (count: number) => {
-    // Get actual dimensions from the DOM element to ensure points fill the screen
-    let width = 800;
-    let height = 600;
-
-    if (canvasContainerRef.current) {
-      width = canvasContainerRef.current.clientWidth;
-      height = canvasContainerRef.current.clientHeight;
-    }
-
-    setIsComputing(true);
-    try {
-      const generated = await fetchRandomCities(
-        count,
-        Math.max(width, 100),
-        Math.max(height, 100)
-      );
-      setCities(generated);
-      setPath([]);
-      setIsRunning(false);
-    } catch (error) {
-      console.error('Failed to fetch random cities', error);
-    } finally {
-      setIsComputing(false);
-    }
+  const measureCanvas = useCallback(() => {
+    const width = ensureMinDimension(
+      canvasContainerRef.current?.clientWidth ?? DEFAULT_CANVAS_SIZE.width
+    );
+    const height = ensureMinDimension(
+      canvasContainerRef.current?.clientHeight ?? DEFAULT_CANVAS_SIZE.height
+    );
+    return { width, height };
   }, []);
+
+  const handleCanvasClick = useCallback(
+    (x: number, y: number) => {
+      const newCity: City = {
+        id: Date.now(),
+        x,
+        y
+      };
+      setCities(prev => [...prev, newCity]);
+      resetRunState();
+    },
+    [resetRunState]
+  );
+
+  const handleRandomize = useCallback(
+    async (count: number) => {
+      setIsComputing(true);
+      try {
+        const { width, height } = measureCanvas();
+        const generated = await fetchRandomCities(count, width, height);
+        setCities(generated);
+        resetRunState();
+      } catch (error) {
+        console.error('Failed to fetch random cities', error);
+      } finally {
+        setIsComputing(false);
+      }
+    },
+    [measureCanvas, resetRunState]
+  );
 
   const handleClear = useCallback(() => {
     setCities([]);
-    setPath([]);
-    setIsRunning(false);
-  }, []);
+    resetRunState();
+  }, [resetRunState]);
 
   const runVisualization = useCallback(async () => {
     if (cities.length < 2) return;
@@ -75,14 +88,14 @@ const App: React.FC = () => {
     try {
       const result = await solveTsp(selectedAlgorithm, cities);
       targetPathRef.current = result.path;
-      setPath([]);
+      resetRunState();
       setIsRunning(true);
     } catch (error) {
       console.error('Failed to solve TSP', error);
     } finally {
       setIsComputing(false);
     }
-  }, [cities, selectedAlgorithm]);
+  }, [cities, selectedAlgorithm, resetRunState]);
 
   const handleAnalyze = useCallback(async () => {
     if (cities.length < 3) return;
@@ -99,6 +112,13 @@ const App: React.FC = () => {
     }
   }, [cities]);
 
+  const clearTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
   // Animation Loop
   useEffect(() => {
     if (!isRunning) return;
@@ -111,19 +131,15 @@ const App: React.FC = () => {
           return prevPath;
         }
 
-        // Add one city from the target path at a time
         const nextIndex = prevPath.length;
         return [...prevPath, target[nextIndex]];
       });
     };
 
-    // Speed depends on algorithm complexity? No, keep animation uniform
-    timerRef.current = window.setTimeout(step, 50);
+    timerRef.current = window.setTimeout(step, STEP_DELAY_MS);
 
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [isRunning, path]); // Dependency on path ensures subsequent steps
+    return clearTimer;
+  }, [isRunning, path, clearTimer]); // Dependency on path ensures subsequent steps
 
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-slate-900 text-white overflow-hidden">
@@ -136,7 +152,7 @@ const App: React.FC = () => {
               cities={cities}
               path={path}
               onCanvasClick={handleCanvasClick}
-              isRunning={isRunning || isComputing}
+              isRunning={isBusy}
               language={language}
             />
           </div>
@@ -156,7 +172,7 @@ const App: React.FC = () => {
         onAnalyze={handleAnalyze}
         onLanguageChange={setLanguage}
         selectedAlgorithm={selectedAlgorithm}
-        isRunning={isRunning || isComputing}
+        isRunning={isBusy}
         cityCount={cities.length}
         totalDistance={getTotalDistance(cities, path)}
         language={language}
