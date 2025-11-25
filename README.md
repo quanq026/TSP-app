@@ -26,7 +26,7 @@ npm install
 echo VITE_API_URL=http://localhost:8000 > .env.local   # chỉnh URL nếu backend chạy nơi khác
 npm run dev
 ```
-VVite sẽ mở tại `http://localhost:5173`. Toàn bộ thao tác (random điểm, chạy thuật toán, phân tích) đều gọi FastAPI thông qua JSON.
+Toàn bộ thao tác (random điểm, chạy thuật toán, phân tích) đều gọi FastAPI thông qua JSON.
 
 ## Build & Deploy
 - Frontend: `npm run build` và deploy nội dung trong `dist/`.
