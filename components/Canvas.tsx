@@ -25,10 +25,11 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
       onClick={handleClick}
-      className="relative w-full h-full bg-slate-800 rounded-lg overflow-hidden shadow-inner cursor-crosshair border border-slate-700"
+      className="relative w-full h-full rounded-lg overflow-hidden shadow-inner cursor-crosshair"
+      style={{ backgroundColor: '#1f1d2e', border: '1px solid #26233a' }}
     >
       <svg className="w-full h-full pointer-events-none">
         {/* Draw Path */}
@@ -44,7 +45,7 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
               y1={c1.y}
               x2={c2.x}
               y2={c2.y}
-              stroke="#10b981" // emerald-500
+              stroke="#9ccfd8" // foam
               strokeWidth="2"
               className="drop-shadow-md"
             />
@@ -58,7 +59,7 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
             y1={cities.find(c => c.id === path[path.length - 1])?.y}
             x2={cities.find(c => c.id === path[0])?.x}
             y2={cities.find(c => c.id === path[0])?.y}
-            stroke="#10b981"
+            stroke="#9ccfd8"
             strokeWidth="2"
             strokeDasharray="5,5"
             className="opacity-50"
@@ -77,13 +78,13 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
                 cx={city.x}
                 cy={city.y}
                 r={isCurrent ? 8 : 6}
-                fill={isStart ? '#3b82f6' : isCurrent ? '#f59e0b' : isVisited ? '#10b981' : '#ef4444'}
+                fill={isStart ? '#31748f' : isCurrent ? '#f6c177' : isVisited ? '#9ccfd8' : '#eb6f92'}
                 className="transition-all duration-300"
               />
-               <text 
-                x={city.x + 10} 
-                y={city.y + 4} 
-                fill="rgba(255,255,255,0.7)" 
+              <text
+                x={city.x + 10}
+                y={city.y + 4}
+                fill="rgba(224, 222, 244, 0.7)"
                 fontSize="10"
                 className="pointer-events-none select-none"
               >
@@ -93,9 +94,9 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
           );
         })}
       </svg>
-      
+
       {cities.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-slate-500">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ color: '#6e6a86' }}>
           <p>{t.clickToAdd}</p>
         </div>
       )}
