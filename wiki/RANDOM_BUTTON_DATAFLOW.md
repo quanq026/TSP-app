@@ -7,8 +7,9 @@ Tài liệu này mô tả chi tiết quá trình xử lý dữ liệu từ khi n
 
 ## 🔄 Luồng Dữ Liệu Toàn Bộ
 
-```
+
 BƯỚC 1: User Ấn Nút (Frontend - ControlPanel.tsx)
+```
 Người dùng nhập số: "30"
         ↓
 Ấn nút "Randomize" 
@@ -18,7 +19,9 @@ handleRandomizeClick() được gọi:
   - Chuyển đổi: num = parseInt("30", 10) = 30
   - Xác thực: 3 ≤ 30 ≤ 500 ✓
   - Gọi: onRandomize(30)
+```
 BƯỚC 2: React State Update (App.tsx)
+```
 onRandomize(30) → handleRandomize(30) được gọi:
   - setIsComputing(true) → hiển thị loading
   - Lấy kích thước canvas:
@@ -29,7 +32,9 @@ onRandomize(30) → handleRandomize(30) được gọi:
       width = 800
       height = 600
   - Gọi: fetchRandomCities(30, 800, 600)
+```
 BƯỚC 3: HTTP Request (utils/api.ts)
+```
 fetchRandomCities(30, 800, 600):
   - Tạo URLSearchParams:
       count=30
@@ -38,7 +43,9 @@ fetchRandomCities(30, 800, 600):
   - URL được gọi: http://localhost:8000/cities/random?count=30&width=800&height=600
   - Method: GET
   - await fetch() → gửi request
+```
 BƯỚC 4: Backend Xử Lý (main.py)
+```
 Route: @app.get("/cities/random")
   - Nhận tham số:
       count: 30
@@ -49,7 +56,9 @@ Route: @app.get("/cities/random")
       100 ≤ width ≤ 4000 ✓
       100 ≤ height ≤ 4000 ✓
   - Gọi: generate_random_cities(30, 800, 600)
+```
 BƯỚC 5: Tạo Dữ Liệu (randomizer.py)
+```
 generate_random_cities(30, 800, 600):
   - Tính toán safe zone:
       safe_width = 800 - (30×2) = 740px
@@ -62,7 +71,9 @@ generate_random_cities(30, 800, 600):
       ...
       Tạo: City(id=29, x=..., y=...)
   - Return: List[City] với 30 thành phố
+```
 BƯỚC 6: Định Dạng Response (schemas.py)
+```
 Dữ liệu trả về theo schema RandomCitiesResponse:
 {
   "cities": [
@@ -72,13 +83,17 @@ Dữ liệu trả về theo schema RandomCitiesResponse:
     {"id": 29, "x": 620.1, "y": 420.5}
   ]
 }
+```
 BƯỚC 7: Frontend Nhận Response (utils/api.ts)
+```
 handleResponse<BackendRandomCitiesResponse>(response):
   - Kiểm tra: response.ok === true ✓
   - Parse JSON: response.json()
   - Return: data.cities
          → Array[City] với 30 phần tử
+```
 BƯỚC 8: Update State (App.tsx)
+```
 await fetchRandomCities() → cities = [30 city objects]
         ↓
 setCities(cities)
@@ -88,7 +103,9 @@ resetRunState():
   - setIsRunning(false)
         ↓
 setIsComputing(false) → tắt loading
+```
 BƯỚC 9: Re-render UI (Canvas.tsx)
+```
 State thay đổi:
   cities: [30 city objects] ← NEW
   path: []
