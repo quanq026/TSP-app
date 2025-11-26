@@ -6,6 +6,7 @@ import { City, AlgorithmType, AnalysisResult, Language } from './types';
 import { translations } from './utils/translations';
 import { fetchRandomCities, solveTsp, analyzeAlgorithms } from './utils/api';
 import { getTotalDistance } from './utils/geometry';
+import { theme, withOpacity } from './utils/theme';
 
 const DEFAULT_CANVAS_SIZE = { width: 800, height: 600 };
 const MIN_DIMENSION = 100;
@@ -142,10 +143,10 @@ const App: React.FC = () => {
   }, [isRunning, path, clearTimer]); // Dependency on path ensures subsequent steps
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-slate-900 text-white overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-screen overflow-hidden" style={{ backgroundColor: theme.colors.base, color: theme.colors.text }}>
       {/* Main Visualizer Area */}
       <div className="flex-1 p-4 h-full flex flex-col">
-        <div className="flex-1 relative bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700">
+        <div className="flex-1 relative rounded-xl overflow-hidden shadow-2xl" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.overlay}` }}>
           {/* Attach ref to this container to measure actual size */}
           <div ref={canvasContainerRef} className="absolute inset-0 p-4">
             <Canvas
@@ -157,8 +158,8 @@ const App: React.FC = () => {
             />
           </div>
 
-          <div className="absolute top-4 left-8 bg-slate-900/80 backdrop-blur px-4 py-2 rounded-lg border border-slate-700 text-xs text-slate-400 pointer-events-none">
-            {t.algorithm}: <span className="text-emerald-400 font-bold">{t.algoNames[selectedAlgorithm]}</span>
+          <div className="absolute top-4 left-8 backdrop-blur px-4 py-2 rounded-lg text-xs pointer-events-none" style={{ backgroundColor: withOpacity(theme.colors.base, 0.8), border: `1px solid ${theme.colors.overlay}`, color: theme.colors.subtle }}>
+            {t.algorithm}: <span className="font-bold" style={{ color: theme.colors.foam }}>{t.algoNames[selectedAlgorithm]}</span>
           </div>
         </div>
       </div>
