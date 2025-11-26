@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { City, Language } from '../types';
 import { translations } from '../utils/translations';
+import { theme, withOpacity } from '../utils/theme';
 
 interface CanvasProps {
   cities: City[];
@@ -29,7 +30,7 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
       ref={containerRef}
       onClick={handleClick}
       className="relative w-full h-full rounded-lg overflow-hidden shadow-inner cursor-crosshair"
-      style={{ backgroundColor: '#1f1d2e', border: '1px solid #26233a' }}
+      style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.overlay}` }}
     >
       <svg className="w-full h-full pointer-events-none">
         {/* Draw Path */}
@@ -45,7 +46,7 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
               y1={c1.y}
               x2={c2.x}
               y2={c2.y}
-              stroke="#9ccfd8" // foam
+              stroke={theme.colors.foam}
               strokeWidth="2"
               className="drop-shadow-md"
             />
@@ -59,7 +60,7 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
             y1={cities.find(c => c.id === path[path.length - 1])?.y}
             x2={cities.find(c => c.id === path[0])?.x}
             y2={cities.find(c => c.id === path[0])?.y}
-            stroke="#9ccfd8"
+            stroke={theme.colors.foam}
             strokeWidth="2"
             strokeDasharray="5,5"
             className="opacity-50"
@@ -78,13 +79,13 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
                 cx={city.x}
                 cy={city.y}
                 r={isCurrent ? 8 : 6}
-                fill={isStart ? '#31748f' : isCurrent ? '#f6c177' : isVisited ? '#9ccfd8' : '#eb6f92'}
+                fill={isStart ? theme.colors.pine : isCurrent ? theme.colors.gold : isVisited ? theme.colors.foam : theme.colors.love}
                 className="transition-all duration-300"
               />
               <text
                 x={city.x + 10}
                 y={city.y + 4}
-                fill="rgba(224, 222, 244, 0.7)"
+                fill={withOpacity(theme.colors.text, 0.7)}
                 fontSize="10"
                 className="pointer-events-none select-none"
               >
@@ -96,7 +97,7 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
       </svg>
 
       {cities.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ color: '#6e6a86' }}>
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ color: theme.colors.muted }}>
           <p>{t.clickToAdd}</p>
         </div>
       )}

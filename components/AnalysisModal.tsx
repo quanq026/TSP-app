@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { X, Trophy, Timer, BarChart3, Ruler } from 'lucide-react';
 import { AnalysisResult, City, Language, AlgorithmType } from '../types';
 import { translations } from '../utils/translations';
+import { theme, withOpacity } from '../utils/theme';
 
 interface AnalysisModalProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ const PathPreview: React.FC<{ cities: City[]; path: number[]; color: string }> =
   }, [cities]);
 
   return (
-    <div className="w-full h-32 rounded-md overflow-hidden" style={{ backgroundColor: '#191724', border: '1px solid rgba(38, 35, 58, 0.5)' }}>
+    <div className="w-full h-32 rounded-md overflow-hidden" style={{ backgroundColor: theme.colors.base, border: `1px solid ${withOpacity(theme.colors.overlay, 0.5)}` }}>
       <svg
         viewBox={`${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}`}
         className="w-full h-full"
@@ -69,7 +70,7 @@ const PathPreview: React.FC<{ cities: City[]; path: number[]; color: string }> =
             cx={c.x}
             cy={c.y}
             r={Math.max(3, bounds.width / 200)}
-            fill="#6e6a86"
+            fill={theme.colors.muted}
           />
         ))}
       </svg>
@@ -89,8 +90,8 @@ const MetricChart: React.FC<ChartProps> = ({ title, icon, data, unit, lowerIsBet
   const maxValue = Math.max(...data.map(d => d.value));
 
   return (
-    <div className="p-4 rounded-xl flex-1" style={{ backgroundColor: 'rgba(25, 23, 36, 0.5)', border: '1px solid rgba(38, 35, 58, 0.5)' }}>
-      <div className="flex items-center gap-2 mb-4" style={{ color: '#908caa' }}>
+    <div className="p-4 rounded-xl flex-1" style={{ backgroundColor: withOpacity(theme.colors.base, 0.5), border: `1px solid ${withOpacity(theme.colors.overlay, 0.5)}` }}>
+      <div className="flex items-center gap-2 mb-4" style={{ color: theme.colors.subtle }}>
         {icon}
         <h3 className="font-semibold text-sm uppercase tracking-wide">{title}</h3>
       </div>
@@ -100,12 +101,12 @@ const MetricChart: React.FC<ChartProps> = ({ title, icon, data, unit, lowerIsBet
           return (
             <div key={item.label}>
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-medium" style={{ color: '#908caa' }}>{item.label}</span>
-                <span className="font-mono" style={{ color: '#e0def4' }}>
+                <span className="font-medium" style={{ color: theme.colors.subtle }}>{item.label}</span>
+                <span className="font-mono" style={{ color: theme.colors.text }}>
                   {item.value.toFixed(1)}{unit}
                 </span>
               </div>
-              <div className="w-full rounded-full h-2.5 overflow-hidden" style={{ backgroundColor: '#1f1d2e' }}>
+              <div className="w-full rounded-full h-2.5 overflow-hidden" style={{ backgroundColor: theme.colors.surface }}>
                 <div
                   className="h-full rounded-full transition-all duration-500 ease-out relative"
                   style={{ width: `${percent}%`, backgroundColor: item.color }}
@@ -145,27 +146,27 @@ const AnalysisModal: React.FC<AnalysisModalProps> = ({ isOpen, onClose, results,
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}>
-      <div className="rounded-xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[95vh]" style={{ backgroundColor: '#1f1d2e', border: '1px solid #26233a' }}>
-        <div className="flex items-center justify-between p-5 shrink-0" style={{ borderBottom: '1px solid #26233a', backgroundColor: '#1f1d2e' }}>
-          <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: '#e0def4' }}>
-            <span style={{ color: '#9ccfd8' }}>📊</span> {t.analysis.title}
+      <div className="rounded-xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[95vh]" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.overlay}` }}>
+        <div className="flex items-center justify-between p-5 shrink-0" style={{ borderBottom: `1px solid ${theme.colors.overlay}`, backgroundColor: theme.colors.surface }}>
+          <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: theme.colors.text }}>
+            <span style={{ color: theme.colors.foam }}>📊</span> {t.analysis.title}
           </h2>
-          <button onClick={onClose} className="transition-colors" style={{ color: '#908caa' }} onMouseEnter={(e) => e.currentTarget.style.color = '#e0def4'} onMouseLeave={(e) => e.currentTarget.style.color = '#908caa'}>
+          <button onClick={onClose} className="transition-colors" style={{ color: theme.colors.subtle }} onMouseEnter={(e) => e.currentTarget.style.color = theme.colors.text} onMouseLeave={(e) => e.currentTarget.style.color = theme.colors.subtle}>
             <X size={24} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6" style={{ scrollbarColor: '#26233a transparent' }}>
+        <div className="flex-1 overflow-y-auto p-6" style={{ scrollbarColor: `${theme.colors.overlay} transparent` }}>
 
           {/* Winner Banner */}
-          <div className="p-4 rounded-lg flex items-center gap-4 mb-8" style={{ background: 'linear-gradient(to right, rgba(156, 207, 216, 0.1), rgba(49, 116, 143, 0.1))', border: '1px solid rgba(156, 207, 216, 0.3)' }}>
-            <div className="p-3 rounded-full shrink-0" style={{ backgroundColor: 'rgba(156, 207, 216, 0.2)' }}>
-              <Trophy style={{ color: '#9ccfd8' }} size={32} />
+          <div className="p-4 rounded-lg flex items-center gap-4 mb-8" style={{ background: `linear-gradient(to right, ${withOpacity(theme.colors.foam, 0.1)}, ${withOpacity(theme.colors.pine, 0.1)})`, border: `1px solid ${withOpacity(theme.colors.foam, 0.3)}` }}>
+            <div className="p-3 rounded-full shrink-0" style={{ backgroundColor: withOpacity(theme.colors.foam, 0.2) }}>
+              <Trophy style={{ color: theme.colors.foam }} size={32} />
             </div>
             <div>
-              <p className="font-medium text-sm" style={{ color: '#9ccfd8' }}>{t.analysis.winnerTitle}</p>
-              <p className="text-2xl font-bold" style={{ color: '#e0def4' }}>{getAlgoName(winner?.algorithm)}</p>
-              <p className="text-sm" style={{ color: '#908caa' }}>{t.analysis.totalDist}: <span className="font-mono" style={{ color: '#e0def4' }}>{winner?.distance.toFixed(1)}</span></p>
+              <p className="font-medium text-sm" style={{ color: theme.colors.foam }}>{t.analysis.winnerTitle}</p>
+              <p className="text-2xl font-bold" style={{ color: theme.colors.text }}>{getAlgoName(winner?.algorithm)}</p>
+              <p className="text-sm" style={{ color: theme.colors.subtle }}>{t.analysis.totalDist}: <span className="font-mono" style={{ color: theme.colors.text }}>{winner?.distance.toFixed(1)}</span></p>
             </div>
           </div>
 
@@ -174,27 +175,27 @@ const AnalysisModal: React.FC<AnalysisModalProps> = ({ isOpen, onClose, results,
             {sortedResults.map((result, idx) => {
               const isWinner = idx === 0;
               const relative = ((result.distance / winner.distance) * 100).toFixed(1);
-              const color = isWinner ? '#9ccfd8' : '#6e6a86';
+              const color = isWinner ? theme.colors.foam : theme.colors.muted;
 
               return (
-                <div key={result.algorithm} className="flex flex-col p-4 rounded-lg border h-full" style={isWinner ? { backgroundColor: 'rgba(156, 207, 216, 0.1)', borderColor: 'rgba(156, 207, 216, 0.5)' } : { backgroundColor: 'rgba(38, 35, 58, 0.3)', borderColor: '#26233a' }}>
+                <div key={result.algorithm} className="flex flex-col p-4 rounded-lg border h-full" style={isWinner ? { backgroundColor: withOpacity(theme.colors.foam, 0.1), borderColor: withOpacity(theme.colors.foam, 0.5) } : { backgroundColor: withOpacity(theme.colors.overlay, 0.3), borderColor: theme.colors.overlay }}>
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <h3 className="font-bold text-sm" style={{ color: isWinner ? '#e0def4' : '#908caa' }}>{getAlgoName(result.algorithm)}</h3>
-                      <div className="text-xs flex items-center gap-1 mt-1" style={{ color: '#6e6a86' }}>
+                      <h3 className="font-bold text-sm" style={{ color: isWinner ? theme.colors.text : theme.colors.subtle }}>{getAlgoName(result.algorithm)}</h3>
+                      <div className="text-xs flex items-center gap-1 mt-1" style={{ color: theme.colors.muted }}>
                         <Timer size={10} /> {result.executionTime.toFixed(1)}ms
                       </div>
                     </div>
-                    <span className="text-xs font-medium px-2 py-1 rounded-full" style={isWinner ? { backgroundColor: 'rgba(156, 207, 216, 0.2)', color: '#9ccfd8' } : { backgroundColor: '#26233a', color: '#908caa' }}>
+                    <span className="text-xs font-medium px-2 py-1 rounded-full" style={isWinner ? { backgroundColor: withOpacity(theme.colors.foam, 0.2), color: theme.colors.foam } : { backgroundColor: theme.colors.overlay, color: theme.colors.subtle }}>
                       {relative}%
                     </span>
                   </div>
 
                   <div className="mb-3">
-                    <span className="text-2xl font-mono font-medium block" style={{ color: '#e0def4' }}>
+                    <span className="text-2xl font-mono font-medium block" style={{ color: theme.colors.text }}>
                       {result.distance.toFixed(0)}
                     </span>
-                    <span className="text-xs uppercase tracking-wider" style={{ color: '#6e6a86' }}>{t.analysis.totalDist}</span>
+                    <span className="text-xs uppercase tracking-wider" style={{ color: theme.colors.muted }}>{t.analysis.totalDist}</span>
                   </div>
 
                   <div className="mt-auto pt-2">
@@ -206,8 +207,8 @@ const AnalysisModal: React.FC<AnalysisModalProps> = ({ isOpen, onClose, results,
           </div>
 
           {/* Charts Section */}
-          <h3 className="text-lg font-bold mb-4 flex items-center gap-2" style={{ color: '#e0def4' }}>
-            <BarChart3 style={{ color: '#31748f' }} size={20} />
+          <h3 className="text-lg font-bold mb-4 flex items-center gap-2" style={{ color: theme.colors.text }}>
+            <BarChart3 style={{ color: theme.colors.pine }} size={20} />
             Performance Comparison
           </h3>
 
@@ -219,7 +220,7 @@ const AnalysisModal: React.FC<AnalysisModalProps> = ({ isOpen, onClose, results,
               data={results.map(r => ({
                 label: getAlgoName(r.algorithm),
                 value: r.distance,
-                color: r.distance === winner.distance ? '#9ccfd8' : '#6e6a86'
+                color: r.distance === winner.distance ? theme.colors.foam : theme.colors.muted
               }))}
             />
 
@@ -230,15 +231,15 @@ const AnalysisModal: React.FC<AnalysisModalProps> = ({ isOpen, onClose, results,
               data={results.map(r => ({
                 label: getAlgoName(r.algorithm),
                 value: r.executionTime,
-                color: r.executionTime < 1 ? '#31748f' : (r.executionTime > 20 ? '#f6c177' : '#c4a7e7')
+                color: r.executionTime < 1 ? theme.colors.pine : (r.executionTime > 20 ? theme.colors.gold : theme.colors.iris)
               }))}
             />
           </div>
 
         </div>
 
-        <div className="p-4 text-center shrink-0" style={{ backgroundColor: 'rgba(25, 23, 36, 0.5)', borderTop: '1px solid #26233a' }}>
-          <p className="text-xs" style={{ color: '#6e6a86' }}>
+        <div className="p-4 text-center shrink-0" style={{ backgroundColor: withOpacity(theme.colors.base, 0.5), borderTop: `1px solid ${theme.colors.overlay}` }}>
+          <p className="text-xs" style={{ color: theme.colors.muted }}>
             {t.analysis.note}
           </p>
         </div>

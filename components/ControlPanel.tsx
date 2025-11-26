@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Play, RotateCcw, Trash2, Activity, Globe } from 'lucide-react';
 import { AlgorithmType, Language } from '../types';
 import { translations } from '../utils/translations';
+import { theme, withOpacity } from '../utils/theme';
 
 interface ControlPanelProps {
   onRun: () => void;
@@ -61,35 +62,35 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   return (
-    <div className="w-full lg:w-80 p-6 flex flex-col gap-6 h-full overflow-y-auto" style={{ backgroundColor: '#1f1d2e', borderLeft: '1px solid #26233a' }}>
+    <div className="w-full lg:w-80 p-6 flex flex-col gap-6 h-full overflow-y-auto" style={{ backgroundColor: theme.colors.surface, borderLeft: `1px solid ${theme.colors.overlay}` }}>
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-2xl font-bold mb-2" style={{ background: 'linear-gradient(to right, #31748f, #9ccfd8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          <h1 className="text-2xl font-bold mb-2" style={{ background: `linear-gradient(to right, ${theme.colors.pine}, ${theme.colors.foam})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             {t.title}
           </h1>
-          <p className="text-sm" style={{ color: '#908caa' }}>
+          <p className="text-sm" style={{ color: theme.colors.subtle }}>
             {t.subtitle}
           </p>
         </div>
       </div>
 
       {/* Language Switcher */}
-      <div className="flex rounded-lg p-1" style={{ backgroundColor: '#191724', border: '1px solid #26233a' }}>
+      <div className="flex rounded-lg p-1" style={{ backgroundColor: theme.colors.base, border: `1px solid ${theme.colors.overlay}` }}>
         <button
           onClick={() => onLanguageChange('en')}
           className={`flex-1 py-1 px-2 rounded-md text-xs font-medium transition-all ${language === 'en' ? 'shadow-sm' : ''}`}
-          style={language === 'en' ? { backgroundColor: '#26233a', color: '#e0def4' } : { color: '#6e6a86' }}
-          onMouseEnter={(e) => { if (language !== 'en') e.currentTarget.style.color = '#908caa'; }}
-          onMouseLeave={(e) => { if (language !== 'en') e.currentTarget.style.color = '#6e6a86'; }}
+          style={language === 'en' ? { backgroundColor: theme.colors.overlay, color: theme.colors.text } : { color: theme.colors.muted }}
+          onMouseEnter={(e) => { if (language !== 'en') e.currentTarget.style.color = theme.colors.subtle; }}
+          onMouseLeave={(e) => { if (language !== 'en') e.currentTarget.style.color = theme.colors.muted; }}
         >
           English
         </button>
         <button
           onClick={() => onLanguageChange('vi')}
           className={`flex-1 py-1 px-2 rounded-md text-xs font-medium transition-all ${language === 'vi' ? 'shadow-sm' : ''}`}
-          style={language === 'vi' ? { backgroundColor: '#26233a', color: '#e0def4' } : { color: '#6e6a86' }}
-          onMouseEnter={(e) => { if (language !== 'vi') e.currentTarget.style.color = '#908caa'; }}
-          onMouseLeave={(e) => { if (language !== 'vi') e.currentTarget.style.color = '#6e6a86'; }}
+          style={language === 'vi' ? { backgroundColor: theme.colors.overlay, color: theme.colors.text } : { color: theme.colors.muted }}
+          onMouseEnter={(e) => { if (language !== 'vi') e.currentTarget.style.color = theme.colors.subtle; }}
+          onMouseLeave={(e) => { if (language !== 'vi') e.currentTarget.style.color = theme.colors.muted; }}
         >
           Tiếng Việt
         </button>
@@ -97,33 +98,33 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#908caa' }}>{t.algorithm}</label>
+          <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: theme.colors.subtle }}>{t.algorithm}</label>
           <select
             value={selectedAlgorithm}
             onChange={(e) => onAlgorithmChange(e.target.value as AlgorithmType)}
             disabled={isRunning}
             className="w-full rounded-lg p-3 outline-none transition-colors"
-            style={{ backgroundColor: '#191724', border: '1px solid #6e6a86', color: '#e0def4' }}
-            onFocus={(e) => e.currentTarget.style.borderColor = '#31748f'}
-            onBlur={(e) => e.currentTarget.style.borderColor = '#6e6a86'}
+            style={{ backgroundColor: theme.colors.base, border: `1px solid ${theme.colors.muted}`, color: theme.colors.text }}
+            onFocus={(e) => e.currentTarget.style.borderColor = theme.colors.pine}
+            onBlur={(e) => e.currentTarget.style.borderColor = theme.colors.muted}
           >
             <option value={AlgorithmType.NEAREST_NEIGHBOR}>{t.algoNames[AlgorithmType.NEAREST_NEIGHBOR]}</option>
             <option value={AlgorithmType.ACO}>{t.algoNames[AlgorithmType.ACO]}</option>
             <option value={AlgorithmType.SPACE_FILLING_CURVE}>{t.algoNames[AlgorithmType.SPACE_FILLING_CURVE]}</option>
           </select>
-          <p className="mt-2 text-xs italic leading-relaxed" style={{ color: '#6e6a86' }}>
+          <p className="mt-2 text-xs italic leading-relaxed" style={{ color: theme.colors.muted }}>
             {t.algoDescriptions[selectedAlgorithm]}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(38, 35, 58, 0.5)' }}>
-            <span className="text-xs block" style={{ color: '#908caa' }}>{t.cities}</span>
-            <span className="text-xl font-mono font-semibold" style={{ color: '#e0def4' }}>{cityCount}</span>
+          <div className="p-3 rounded-lg" style={{ backgroundColor: withOpacity(theme.colors.overlay, 0.5) }}>
+            <span className="text-xs block" style={{ color: theme.colors.subtle }}>{t.cities}</span>
+            <span className="text-xl font-mono font-semibold" style={{ color: theme.colors.text }}>{cityCount}</span>
           </div>
-          <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(38, 35, 58, 0.5)' }}>
-            <span className="text-xs block" style={{ color: '#908caa' }}>{t.distance}</span>
-            <span className="text-xl font-mono font-semibold" style={{ color: '#9ccfd8' }}>
+          <div className="p-3 rounded-lg" style={{ backgroundColor: withOpacity(theme.colors.overlay, 0.5) }}>
+            <span className="text-xs block" style={{ color: theme.colors.subtle }}>{t.distance}</span>
+            <span className="text-xl font-mono font-semibold" style={{ color: theme.colors.foam }}>
               {totalDistance.toFixed(0)}
             </span>
           </div>
@@ -136,11 +137,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           disabled={isRunning || cityCount < 2}
           className="flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition-all"
           style={isRunning || cityCount < 2
-            ? { backgroundColor: '#26233a', color: '#6e6a86', cursor: 'not-allowed' }
-            : { backgroundColor: '#31748f', color: '#e0def4' }
+            ? { backgroundColor: theme.colors.overlay, color: theme.colors.muted, cursor: 'not-allowed' }
+            : { backgroundColor: theme.colors.pine, color: theme.colors.text }
           }
-          onMouseEnter={(e) => { if (!isRunning && cityCount >= 2) e.currentTarget.style.backgroundColor = '#286983'; }}
-          onMouseLeave={(e) => { if (!isRunning && cityCount >= 2) e.currentTarget.style.backgroundColor = '#31748f'; }}
+          onMouseEnter={(e) => { if (!isRunning && cityCount >= 2) e.currentTarget.style.backgroundColor = theme.colors.info; }}
+          onMouseLeave={(e) => { if (!isRunning && cityCount >= 2) e.currentTarget.style.backgroundColor = theme.colors.pine; }}
         >
           <Play size={18} />
           {isRunning ? t.running : t.run}
@@ -151,17 +152,17 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           disabled={isRunning || cityCount < 3}
           className="flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition-all border"
           style={isRunning || cityCount < 3
-            ? { borderColor: '#26233a', color: '#6e6a86', cursor: 'not-allowed' }
-            : { borderColor: 'rgba(156, 207, 216, 0.5)', color: '#9ccfd8' }
+            ? { borderColor: theme.colors.overlay, color: theme.colors.muted, cursor: 'not-allowed' }
+            : { borderColor: withOpacity(theme.colors.foam, 0.5), color: theme.colors.foam }
           }
-          onMouseEnter={(e) => { if (!isRunning && cityCount >= 3) e.currentTarget.style.backgroundColor = 'rgba(156, 207, 216, 0.1)'; }}
+          onMouseEnter={(e) => { if (!isRunning && cityCount >= 3) e.currentTarget.style.backgroundColor = withOpacity(theme.colors.foam, 0.1); }}
           onMouseLeave={(e) => { if (!isRunning && cityCount >= 3) e.currentTarget.style.backgroundColor = 'transparent'; }}
         >
           <Activity size={18} />
           {t.analyze}
         </button>
 
-        <div className="h-px my-1" style={{ backgroundColor: '#26233a' }}></div>
+        <div className="h-px my-1" style={{ backgroundColor: theme.colors.overlay }}></div>
 
         <div className="flex gap-2">
           <div className="w-1/4">
@@ -172,12 +173,12 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               onChange={handleInputChange}
               onBlur={(e) => {
                 handleBlur();
-                e.currentTarget.style.borderColor = '#6e6a86';
+                e.currentTarget.style.borderColor = theme.colors.muted;
               }}
               disabled={isRunning}
               className="w-full rounded-lg p-3 outline-none text-center transition-colors"
-              style={{ backgroundColor: '#191724', border: '1px solid #6e6a86', color: '#e0def4' }}
-              onFocus={(e) => e.currentTarget.style.borderColor = '#31748f'}
+              style={{ backgroundColor: theme.colors.base, border: `1px solid ${theme.colors.muted}`, color: theme.colors.text }}
+              onFocus={(e) => e.currentTarget.style.borderColor = theme.colors.pine}
               title="Number of cities"
             />
           </div>
@@ -185,9 +186,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             onClick={handleRandomizeClick}
             disabled={isRunning}
             className="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg transition-all"
-            style={{ backgroundColor: '#26233a', color: '#e0def4' }}
-            onMouseEnter={(e) => { if (!isRunning) e.currentTarget.style.backgroundColor = '#403d52'; }}
-            onMouseLeave={(e) => { if (!isRunning) e.currentTarget.style.backgroundColor = '#26233a'; }}
+            style={{ backgroundColor: theme.colors.overlay, color: theme.colors.text }}
+            onMouseEnter={(e) => { if (!isRunning) e.currentTarget.style.backgroundColor = theme.colors.highlightMed; }}
+            onMouseLeave={(e) => { if (!isRunning) e.currentTarget.style.backgroundColor = theme.colors.overlay; }}
           >
             <RotateCcw size={18} />
             {t.randomize}
@@ -198,9 +199,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           onClick={onClear}
           disabled={isRunning}
           className="flex items-center justify-center gap-2 p-3 rounded-lg transition-all border"
-          style={{ backgroundColor: '#26233a', color: '#908caa', borderColor: 'transparent' }}
-          onMouseEnter={(e) => { if (!isRunning) { e.currentTarget.style.backgroundColor = 'rgba(235, 111, 146, 0.2)'; e.currentTarget.style.color = '#eb6f92'; e.currentTarget.style.borderColor = 'rgba(235, 111, 146, 0.5)'; } }}
-          onMouseLeave={(e) => { if (!isRunning) { e.currentTarget.style.backgroundColor = '#26233a'; e.currentTarget.style.color = '#908caa'; e.currentTarget.style.borderColor = 'transparent'; } }}
+          style={{ backgroundColor: theme.colors.overlay, color: theme.colors.subtle, borderColor: 'transparent' }}
+          onMouseEnter={(e) => { if (!isRunning) { e.currentTarget.style.backgroundColor = withOpacity(theme.colors.love, 0.2); e.currentTarget.style.color = theme.colors.love; e.currentTarget.style.borderColor = withOpacity(theme.colors.love, 0.5); } }}
+          onMouseLeave={(e) => { if (!isRunning) { e.currentTarget.style.backgroundColor = theme.colors.overlay; e.currentTarget.style.color = theme.colors.subtle; e.currentTarget.style.borderColor = 'transparent'; } }}
         >
           <Trash2 size={18} />
           {t.clear}
