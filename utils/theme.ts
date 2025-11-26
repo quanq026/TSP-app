@@ -1,7 +1,7 @@
 // Theme Configuration
 // Chỉ cần thay đổi theme name ở đây để chuyển đổi toàn bộ ứng dụng
 
-export type ThemeName = 'rosePine' | 'rosePineMoon' | 'rosePineDawn' | 'moonlight';
+export type ThemeName = 'rosePine' | 'rosePineDawn' | 'moonlight' | 'materialDeprecated';
 
 export interface Theme {
     name: string;
@@ -61,29 +61,29 @@ const rosePine: Theme = {
     },
 };
 
-// Rosé Pine Moon (Darker variant)
-const rosePineMoon: Theme = {
-    name: 'Rosé Pine Moon',
+// Material Theme — Deprecated by Material Theme
+const materialDeprecated: Theme = {
+    name: 'Material Theme — Deprecated by Material Theme',
     colors: {
-        base: '#232136',
-        surface: '#2a273f',
-        overlay: '#393552',
-        muted: '#6e6a86',
-        subtle: '#908caa',
-        text: '#e0def4',
-        love: '#eb6f92',
-        gold: '#f6c177',
-        rose: '#ea9a97',
-        pine: '#3e8fb0',
-        foam: '#9ccfd8',
-        iris: '#c4a7e7',
-        highlightLow: '#2a273f',
-        highlightMed: '#393552',
-        highlightHigh: '#6e6a86',
-        success: '#9ccfd8',
-        warning: '#f6c177',
-        error: '#eb6f92',
-        info: '#3e8fb0',
+        base: '#263238',
+        surface: '#37474f',
+        overlay: '#455a64',
+        muted: '#90a4ae',
+        subtle: '#78909c',
+        text: '#eceff1',
+        love: '#ff5252',
+        gold: '#ffc107',
+        rose: '#ff4081',
+        pine: '#03a9f4',
+        foam: '#00bcd4',
+        iris: '#9c27b0',
+        highlightLow: '#2b3a3f',
+        highlightMed: '#455a64',
+        highlightHigh: '#607d8b',
+        success: '#4caf50',
+        warning: '#ff9800',
+        error: '#f44336',
+        info: '#03a9f4',
     },
 };
 
@@ -142,15 +142,15 @@ const moonlight: Theme = {
 // Theme registry
 const themes: Record<ThemeName, Theme> = {
     rosePine,
-    rosePineMoon,
     rosePineDawn,
     moonlight,
+    materialDeprecated,
 };
 
 // ============================================
 // CHỈ CẦN THAY ĐỔI DÒNG NÀY ĐỂ CHUYỂN THEME
 // ============================================
-export const CURRENT_THEME: ThemeName = 'rosePineDawn';
+export const CURRENT_THEME: ThemeName = 'materialDeprecated';
 
 // Export current theme
 export const theme = themes[CURRENT_THEME];
