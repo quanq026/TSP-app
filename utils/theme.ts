@@ -150,7 +150,7 @@ const themes: Record<ThemeName, Theme> = {
 // ============================================
 // CHỈ CẦN THAY ĐỔI DÒNG NÀY ĐỂ CHUYỂN THEME
 // ============================================
-export const CURRENT_THEME: ThemeName = 'moonlight';
+export const CURRENT_THEME: ThemeName = 'rosePineDawn';
 
 // Export current theme
 export const theme = themes[CURRENT_THEME];
