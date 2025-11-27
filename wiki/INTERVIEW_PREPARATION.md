@@ -648,6 +648,681 @@ P(i→j) = [τᵢⱼ]^α × [ηᵢⱼ]^β / Σ[τᵢₖ]^α × [ηᵢₖ]^β
 
 ---
 
+# 5.5 CÂU HỎI NÂNG CAO VỀ THUẬT TOÁN
+
+## Q5.7: Chứng minh độ phức tạp O(n²) của Nearest Neighbor?
+
+**Trả lời:**
+
+```
+Vòng lặp ngoài: n-1 lần (chọn n-1 thành phố)
+  └── Vòng lặp trong: trung bình n/2 lần (tìm min trong unvisited)
+
+Tổng số phép so sánh:
+= (n-1) + (n-2) + (n-3) + ... + 1
+= n(n-1)/2
+= O(n²)
+```
+
+**Chi tiết:**
+- Bước 1: So sánh n-1 cities
+- Bước 2: So sánh n-2 cities
+- ...
+- Bước n-1: So sánh 1 city
+
+---
+
+## Q5.8: Nearest Neighbor có đảm bảo tìm được lời giải tối ưu không? Chứng minh.
+
+**Trả lời:**
+
+**KHÔNG đảm bảo tối ưu.**
+
+**Phản ví dụ:**
+
+```
+      B(1,2)
+     /     \
+    /       \
+   A(0,0)---C(2,0)---D(4,0)
+
+Khoảng cách:
+- A-B = √5 ≈ 2.24
+- A-C = 2
+- B-C = √5 ≈ 2.24
+- C-D = 2
+- B-D = √13 ≈ 3.61
+- A-D = 4
+```
+
+**NN từ A:**
+1. A → C (gần nhất = 2)
+2. C → D (gần nhất = 2)
+3. D → B (còn lại = 3.61)
+4. B → A (về = 2.24)
+**Total: 9.85**
+
+**Tour tối ưu:**
+A → B → C → D → A = 2.24 + 2.24 + 2 + 4 = **10.48**
+
+Hmm, trong trường hợp này NN lại tốt hơn! Nhưng có cases khác:
+
+```
+     B(0,1)          C(3,1)
+        \              /
+         \            /
+          A(1,0)----D(2,0)
+
+NN: A→D→C→B→A có thể tệ hơn A→B→C→D→A
+```
+
+**Kết luận:** NN không optimal vì quyết định greedy tại mỗi bước không xét tương lai.
+
+---
+
+## Q5.9: Approximation ratio của Nearest Neighbor là bao nhiêu?
+
+**Trả lời:**
+
+**Worst-case ratio:** O(log n)
+
+**Định lý (Rosenkrantz et al., 1977):**
+```
+L_NN / L_OPT ≤ (1/2) × (⌈log₂ n⌉ + 1)
+```
+
+**Ý nghĩa:**
+- n = 100 cities → ratio ≤ 4
+- n = 1000 cities → ratio ≤ 5.5
+- Worst case, NN có thể tệ hơn optimal **log(n) lần**
+
+**Thực tế:**
+- Average ratio ≈ 1.20 - 1.25 (tệ hơn 20-25%)
+- Thường tốt hơn worst-case nhiều
+
+---
+
+## Q5.10: Tại sao NN phụ thuộc vào điểm bắt đầu?
+
+**Trả lời:**
+
+```python
+# Ví dụ: 4 cities hình vuông
+#   B --- C
+#   |     |
+#   A --- D
+
+# Bắt đầu từ A:
+# A → B → C → D → A (hoặc A → D → C → B → A)
+
+# Bắt đầu từ B:
+# B → A → D → C → B (có thể khác!)
+```
+
+**Giải pháp: Multi-start NN**
+```python
+def multi_start_nn(cities):
+    best = None
+    for start in range(len(cities)):
+        tour = nn_from(cities, start)
+        if best is None or tour_length(tour) < tour_length(best):
+            best = tour
+    return best
+```
+- Time: O(n³) thay vì O(n²)
+- Quality: Tốt hơn đáng kể
+
+---
+
+## Q5.11: Giải thích chi tiết Hilbert Curve?
+
+**Trả lời:**
+
+**Hilbert curve** là đường cong fractal được xây dựng đệ quy:
+
+```
+Bậc 1 (2×2):     Bậc 2 (4×4):         Bậc 3 (8×8):
+┌─┐              ┌─┬─┐ ┌─┬─┐          (phức tạp hơn)
+│ │              │ │ │ │ │ │
+└─┘              ├─┘ └─┼─┘ │
+                 │     │   │
+                 └─────┴───┘
+
+Thứ tự duyệt:
+0 → 1            0→1→2→3              Theo pattern
+↓   ↑            ↓     ↓              đệ quy
+3 ← 2            7←6←5←4
+                 ↓
+                 8→9→...
+```
+
+**Công thức đệ quy:**
+```python
+def hilbert_xy2d(n, x, y):
+    """Convert (x,y) to Hilbert index d"""
+    d = 0
+    s = n // 2
+    while s > 0:
+        rx = 1 if (x & s) > 0 else 0
+        ry = 1 if (y & s) > 0 else 0
+        d += s * s * ((3 * rx) ^ ry)
+        x, y = rotate(s, x, y, rx, ry)
+        s //= 2
+    return d
+```
+
+**Tại sao Hilbert tốt cho TSP?**
+- **Locality preservation:** Điểm gần trong 2D → index gần trong 1D
+- Không có "jump" lớn như Morton curve
+
+---
+
+## Q5.12: So sánh Morton (Z-order) vs Hilbert curve?
+
+**Trả lời:**
+
+```
+Morton (Z-order):              Hilbert:
+0  1  4  5                     0  1  14 15
+2  3  6  7                     3  2  13 12
+8  9  12 13                    4  7  8  11
+10 11 14 15                    5  6  9  10
+
+Nhảy lớn: 3→4 (từ 3 sang 8)    Liên tục, không nhảy
+```
+
+| Tiêu chí | Morton | Hilbert |
+|----------|--------|---------|
+| **Tính toán** | Bit interleave (nhanh) | Đệ quy (chậm hơn) |
+| **Locality** | Có jumps | Liên tục |
+| **TSP quality** | ~80% | ~85% |
+| **Implementation** | 5 dòng code | 30+ dòng code |
+
+**Code Morton:**
+```python
+def morton(x, y):
+    result = 0
+    for i in range(16):
+        result |= ((x >> i) & 1) << (2*i)
+        result |= ((y >> i) & 1) << (2*i + 1)
+    return result
+```
+
+---
+
+## Q5.13: Giải thích chi tiết công thức xác suất trong ACO?
+
+**Trả lời:**
+
+```
+            [τᵢⱼ]^α × [ηᵢⱼ]^β
+P(i→j) = ──────────────────────────
+          Σₖ [τᵢₖ]^α × [ηᵢₖ]^β
+```
+
+**Trong đó:**
+- `τᵢⱼ` = pheromone trên cạnh (i,j), ban đầu = 1.0
+- `ηᵢⱼ` = 1/distance(i,j) = heuristic (visibility)
+- `α` = trọng số pheromone (mặc định = 1)
+- `β` = trọng số heuristic (mặc định = 3)
+- `k` chạy qua tất cả cities chưa thăm
+
+**Ví dụ:**
+```
+Kiến ở city A, chưa thăm: B, C, D
+- τ_AB = 2.0, d_AB = 10 → η_AB = 0.1
+- τ_AC = 1.0, d_AC = 5  → η_AC = 0.2
+- τ_AD = 1.5, d_AD = 8  → η_AD = 0.125
+
+Với α=1, β=2:
+- P(A→B) ∝ 2.0¹ × 0.1² = 0.02
+- P(A→C) ∝ 1.0¹ × 0.2² = 0.04
+- P(A→D) ∝ 1.5¹ × 0.125² = 0.023
+
+Tổng = 0.083
+P(A→B) = 0.02/0.083 = 24%
+P(A→C) = 0.04/0.083 = 48%  ← Most likely
+P(A→D) = 0.023/0.083 = 28%
+```
+
+---
+
+## Q5.14: Evaporation trong ACO hoạt động thế nào và tại sao cần?
+
+**Trả lời:**
+
+**Công thức:**
+```python
+# Sau mỗi iteration
+for i in range(n):
+    for j in range(n):
+        pheromone[i][j] *= (1 - evaporation_rate)
+```
+
+Với `evaporation_rate = 0.1`:
+- Mỗi iteration, pheromone giảm 10%
+- Sau 10 iterations: còn 0.9^10 ≈ 35%
+- Sau 20 iterations: còn 0.9^20 ≈ 12%
+
+**Tại sao cần evaporation?**
+
+1. **Tránh stuck ở local optimum:**
+   - Nếu không evaporate → đường cũ luôn có pheromone cao nhất
+   - Kiến sẽ không khám phá đường mới
+
+2. **Cho phép "quên" đường tệ:**
+   - Đường không tốt → ít kiến đi → ít deposit
+   - Evaporation làm pheromone giảm → kiến sẽ thử đường khác
+
+3. **Cân bằng exploration/exploitation:**
+   - `evaporation` cao → quên nhanh → exploration nhiều
+   - `evaporation` thấp → nhớ lâu → exploitation nhiều
+
+---
+
+## Q5.15: Deposit pheromone hoạt động thế nào?
+
+**Trả lời:**
+
+**Công thức:**
+```python
+def deposit_pheromones(path, tour_length):
+    deposit = Q / tour_length  # Q = 100 (constant)
+    
+    for i in range(len(path)):
+        a = path[i]
+        b = path[(i + 1) % len(path)]
+        pheromone[a][b] += deposit
+        pheromone[b][a] += deposit  # Symmetric
+```
+
+**Ví dụ:**
+```
+Tour 1: A→B→C→D→A, length = 100
+  deposit = 100/100 = 1.0
+  τ_AB += 1.0, τ_BC += 1.0, τ_CD += 1.0, τ_DA += 1.0
+
+Tour 2: A→C→B→D→A, length = 150
+  deposit = 100/150 = 0.67
+  τ_AC += 0.67, τ_CB += 0.67, ...
+
+→ Sau nhiều iterations:
+  Đường ngắn → deposit nhiều → pheromone cao → kiến đi nhiều hơn
+```
+
+**Positive feedback loop:**
+```
+Đường tốt → Deposit nhiều → Pheromone cao → Kiến đi nhiều → Deposit nhiều hơn
+```
+
+---
+
+## Q5.16: Tại sao ACO là stochastic? Có cách nào làm deterministic không?
+
+**Trả lời:**
+
+**Nguồn ngẫu nhiên trong ACO:**
+
+1. **Roulette wheel selection:**
+```python
+# Chọn city tiếp theo theo xác suất
+threshold = random.random() * total_weight
+for candidate, weight in zip(candidates, weights):
+    threshold -= weight
+    if threshold <= 0:
+        return candidate
+```
+
+2. **Starting position:**
+```python
+current = random.randrange(n)  # Random start
+```
+
+**Cách làm deterministic (không khuyến khích):**
+
+```python
+# Thay roulette wheel bằng greedy:
+def choose_next_city_deterministic(current, unvisited):
+    best = None
+    best_score = 0
+    for j in unvisited:
+        score = pheromone[current][j]**alpha * (1/dist[current][j])**beta
+        if score > best_score:
+            best_score = score
+            best = j
+    return best
+```
+
+**Tại sao KHÔNG nên deterministic?**
+- Mất khả năng exploration
+- Dễ stuck ở local optimum
+- Giống NN với pheromone bias
+
+---
+
+## Q5.17: ACO có hội tụ (converge) không? Bao lâu?
+
+**Trả lời:**
+
+**Có hội tụ**, nhưng tốc độ phụ thuộc tham số.
+
+**Quá trình hội tụ:**
+```
+Iteration 1:   τ = [1.0, 1.0, 1.0, ...]     Đều nhau
+Iteration 10:  τ = [0.8, 1.5, 0.9, ...]     Bắt đầu khác
+Iteration 50:  τ = [0.3, 3.0, 0.4, ...]     Đường tốt nổi bật
+Iteration 150: τ = [0.1, 5.0, 0.1, ...]     Gần hội tụ
+```
+
+**Yếu tố ảnh hưởng tốc độ hội tụ:**
+
+| Tham số | Tăng | Ảnh hưởng hội tụ |
+|---------|------|------------------|
+| num_ants | ↑ | Nhanh hơn |
+| alpha | ↑ | Nhanh hơn (nhưng dễ stuck) |
+| evaporation | ↑ | Chậm hơn |
+| beta | ↑ | Nhanh hơn (giống NN) |
+
+**Làm sao biết đã hội tụ?**
+```python
+# Nếu best_distance không cải thiện sau k iterations
+no_improvement_count = 0
+for iteration in range(max_iterations):
+    # ... run ants ...
+    if new_best < current_best:
+        current_best = new_best
+        no_improvement_count = 0
+    else:
+        no_improvement_count += 1
+    
+    if no_improvement_count > 20:  # Early stopping
+        break
+```
+
+---
+
+## Q5.18: Premature convergence là gì? Cách khắc phục?
+
+**Trả lời:**
+
+**Premature convergence:** Hội tụ quá sớm vào local optimum, không tìm được global optimum.
+
+**Triệu chứng:**
+- Tất cả kiến đi cùng 1 đường
+- Best solution không cải thiện sau nhiều iterations
+- Pheromone tập trung quá mức vào một số cạnh
+
+**Nguyên nhân:**
+- `alpha` quá cao → chỉ follow pheromone
+- `evaporation` quá thấp → không quên đường cũ
+- `num_ants` quá ít → exploration kém
+
+**Giải pháp:**
+
+1. **Tăng evaporation:**
+```python
+evaporation = 0.3  # Thay vì 0.1
+```
+
+2. **Giới hạn pheromone (MMAS - Max-Min Ant System):**
+```python
+tau_min = 0.01
+tau_max = 10.0
+pheromone[i][j] = max(tau_min, min(tau_max, pheromone[i][j]))
+```
+
+3. **Reset pheromone khi stuck:**
+```python
+if no_improvement > threshold:
+    pheromone = [[1.0] * n for _ in range(n)]  # Reset
+```
+
+4. **Chạy nhiều lần với random seeds khác:**
+```python
+ACO_RUNS = 3
+best_overall = min(run_aco() for _ in range(ACO_RUNS))
+```
+
+---
+
+## Q5.19: So sánh ACO với Genetic Algorithm?
+
+**Trả lời:**
+
+| Tiêu chí | ACO | Genetic Algorithm |
+|----------|-----|-------------------|
+| **Inspiration** | Kiến tìm thức ăn | Tiến hóa sinh học |
+| **Population** | Ants | Chromosomes |
+| **Memory** | Pheromone matrix | Fitness scores |
+| **Operators** | Evaporate, Deposit | Crossover, Mutation |
+| **Solution** | Path construction | Path encoding |
+| **TSP quality** | ~95% | ~95% |
+| **Convergence** | Thường nhanh hơn | Thường chậm hơn |
+| **Parameters** | 5-6 | 4-5 |
+
+**GA cho TSP:**
+```python
+# Chromosome = permutation của cities
+# [0, 3, 1, 4, 2] = tour 0→3→1→4→2→0
+
+# Crossover: Order crossover (OX)
+# Mutation: Swap 2 cities
+# Selection: Tournament selection
+```
+
+---
+
+## Q5.20: Edge cases trong implementation?
+
+**Trả lời:**
+
+### 1. Cities ít (n < 3):
+```python
+if len(cities) < 2:
+    return [city.id for city in cities]
+```
+
+### 2. Cities trùng vị trí (distance = 0):
+```python
+# Problem: eta = 1/0 → infinity!
+# Solution:
+eta = 1.0 / max(distance, 0.001)
+
+# Hoặc filter duplicates:
+seen = set()
+unique = [c for c in cities if (c.x, c.y) not in seen and not seen.add((c.x, c.y))]
+```
+
+### 3. Tất cả cities trên 1 đường thẳng:
+```python
+# SFC có thể không tối ưu
+# NN và ACO vẫn hoạt động tốt
+```
+
+### 4. Coordinates rất lớn hoặc rất nhỏ:
+```python
+# SFC: Cần normalize về grid
+x_norm = int((city.x / max_coord) * (GRID_SIZE - 1))
+```
+
+### 5. Floating point precision:
+```python
+# Khi so sánh distances
+if abs(d1 - d2) < 1e-9:
+    # Consider equal
+```
+
+---
+
+## Q5.21: Làm sao cải thiện NN đơn giản?
+
+**Trả lời:**
+
+### 1. Multi-start NN:
+```python
+best = min(nn_from(start) for start in range(n))
+# O(n³) nhưng tốt hơn nhiều
+```
+
+### 2. NN + 2-opt:
+```python
+def two_opt(tour):
+    improved = True
+    while improved:
+        improved = False
+        for i in range(1, n-1):
+            for j in range(i+1, n):
+                if swap_improves(tour, i, j):
+                    tour[i:j+1] = reversed(tour[i:j+1])
+                    improved = True
+    return tour
+
+final_tour = two_opt(nearest_neighbor(cities))
+```
+
+### 3. NN + Or-opt:
+```python
+# Di chuyển sequence 1-3 cities sang vị trí khác
+```
+
+**So sánh kết quả:**
+
+| Method | Quality | Time |
+|--------|---------|------|
+| NN | ~80% | O(n²) |
+| Multi-start NN | ~85% | O(n³) |
+| NN + 2-opt | ~95% | O(n³) |
+| NN + 3-opt | ~98% | O(n⁴) |
+
+---
+
+## Q5.22: Tại sao SFC nhanh nhất?
+
+**Trả lời:**
+
+**Breakdown thời gian:**
+
+| Bước | NN | SFC | ACO |
+|------|-----|-----|-----|
+| Distance matrix | O(n²) | ❌ | O(n²) |
+| Main algorithm | O(n²) | O(n) | O(n² × iter × ants) |
+| Sorting | ❌ | O(n log n) | ❌ |
+| **Total** | **O(n²)** | **O(n log n)** | **O(n² × iter × ants)** |
+
+**Tại sao SFC không cần distance matrix?**
+- Chỉ cần tọa độ (x, y) → tính Hilbert index
+- Không so sánh khoảng cách giữa các cặp cities
+
+**Benchmark (n = 10,000):**
+- NN: ~5 seconds
+- SFC: ~0.1 seconds
+- ACO: ~500 seconds
+
+---
+
+## Q5.23: Có thể hybrid các thuật toán không?
+
+**Trả lời:**
+
+**Có! Một số combinations phổ biến:**
+
+### 1. SFC + 2-opt:
+```python
+initial = space_filling_curve(cities)
+final = two_opt(initial)
+# Nhanh + chất lượng tốt
+```
+
+### 2. NN + ACO:
+```python
+# Dùng NN tour để seed pheromone ban đầu
+nn_tour = nearest_neighbor(cities)
+for i in range(len(nn_tour)):
+    a, b = nn_tour[i], nn_tour[(i+1) % n]
+    pheromone[a][b] = 2.0  # Higher initial
+# Sau đó chạy ACO
+```
+
+### 3. ACO + Local search:
+```python
+for iteration in range(max_iterations):
+    for ant in range(num_ants):
+        tour = construct_tour()
+        tour = two_opt(tour)  # Improve each ant's tour
+        # ...
+```
+
+### 4. Portfolio approach:
+```python
+# Chạy tất cả, lấy best
+results = [nn(cities), sfc(cities), aco(cities)]
+best = min(results, key=tour_length)
+```
+
+---
+
+## Q5.24: Real-time performance - thuật toán nào phù hợp?
+
+**Trả lời:**
+
+**Yêu cầu real-time:** Response < 100ms
+
+| n | NN | SFC | ACO |
+|---|-----|-----|-----|
+| 50 | ✅ 0.5ms | ✅ 0.1ms | ❌ 150ms |
+| 100 | ✅ 2ms | ✅ 0.2ms | ❌ 500ms |
+| 500 | ✅ 50ms | ✅ 1ms | ❌ 5s |
+| 1000 | ⚠️ 200ms | ✅ 2ms | ❌ 20s |
+| 10000 | ❌ 20s | ✅ 20ms | ❌ 30min |
+
+**Khuyến nghị:**
+- n < 100: Dùng ACO nếu có thời gian
+- n < 1000: Dùng NN
+- n > 1000: Dùng SFC
+- Real-time mọi n: SFC
+
+---
+
+## Q5.25: Làm sao đo "chất lượng" của solution?
+
+**Trả lời:**
+
+### 1. So với optimal (nếu biết):
+```python
+quality = optimal_distance / solution_distance * 100
+# 95% = solution dài hơn optimal 5%
+```
+
+### 2. So với lower bound:
+```python
+# MST lower bound
+mst = minimum_spanning_tree(cities)
+lower_bound = mst_weight
+quality = lower_bound / solution_distance * 100
+```
+
+### 3. So với các thuật toán khác:
+```python
+results = {
+    'NN': nn_distance,
+    'SFC': sfc_distance,
+    'ACO': aco_distance
+}
+best = min(results.values())
+for algo, dist in results.items():
+    print(f"{algo}: {best/dist*100:.1f}%")
+```
+
+### 4. Nhiều lần chạy (cho stochastic):
+```python
+runs = [aco(cities) for _ in range(10)]
+print(f"Mean: {mean(runs):.2f}")
+print(f"Std:  {std(runs):.2f}")
+print(f"Best: {min(runs):.2f}")
+```
+
+---
+
 # 6. State Management & Data Flow
 
 ## Q6.1: Các state chính trong App.tsx?
