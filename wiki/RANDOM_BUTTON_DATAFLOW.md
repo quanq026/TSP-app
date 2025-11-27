@@ -1,7 +1,7 @@
 # 🎲 Luồng Dữ Liệu - Nút Random Cities
 
 ## 📋 Tổng Quan
-Tài liệu này mô tả chi tiết quá trình xử lý dữ liệu từ khi người dùng ấn nút "Random" cho đến khi 30 điểm thành phố ngẫu nhiên được hiển thị trên canvas.
+Tài liệu này mô tả chi tiết quá trình xử lý dữ liệu từ khi người dùng ấn nút "Random" cho đến khi các điểm thành phố ngẫu nhiên được hiển thị trên canvas.
 
 ---
 

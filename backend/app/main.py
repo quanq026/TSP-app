@@ -49,6 +49,11 @@ ALGORITHM_LABELS = {
     AlgorithmType.SPACE_FILLING_CURVE: AlgorithmType.SPACE_FILLING_CURVE.value,
 }
 
+# ACO is stochastic - run a few times with different random seeds and keep best
+# Note: Main optimization happens INSIDE ACO (150 iterations with pheromone accumulation)
+# These runs are for different random starting points only
+ACO_RUNS = 3
+
 
 @app.get("/health")
 def health_check() -> Dict[str, str]:
@@ -83,18 +88,42 @@ def solve_tsp(request: SolveRequest) -> SolveResponse:
     if solver is None:
         raise HTTPException(status_code=400, detail="Unsupported algorithm")
 
-    start = time.perf_counter()
-    path = solver(request.cities)
-    duration = (time.perf_counter() - start) * 1000
+    # ACO is stochastic - run multiple times and keep best result
+    if request.algorithm == AlgorithmType.ACO:
+        best_path = []
+        best_distance = float("inf")
+        total_duration = 0.0
 
-    distance = get_total_distance(request.cities, path)
+        for _ in range(ACO_RUNS):
+            start = time.perf_counter()
+            path = solver(request.cities)
+            duration = (time.perf_counter() - start) * 1000
+            total_duration += duration
+            distance = get_total_distance(request.cities, path)
 
-    return SolveResponse(
-        algorithm=request.algorithm,
-        path=path,
-        total_distance=distance,
-        execution_time_ms=duration,
-    )
+            if distance < best_distance:
+                best_distance = distance
+                best_path = path
+
+        return SolveResponse(
+            algorithm=request.algorithm,
+            path=best_path,
+            total_distance=best_distance,
+            execution_time_ms=total_duration,
+        )
+    else:
+        # Deterministic algorithms - run once
+        start = time.perf_counter()
+        path = solver(request.cities)
+        duration = (time.perf_counter() - start) * 1000
+        distance = get_total_distance(request.cities, path)
+
+        return SolveResponse(
+            algorithm=request.algorithm,
+            path=path,
+            total_distance=distance,
+            execution_time_ms=duration,
+        )
 
 
 @app.post("/analyze", response_model=AnalyzeResponse)
@@ -105,18 +134,45 @@ def analyze_algorithms(request: AnalyzeRequest) -> AnalyzeResponse:
     results: list[AnalysisResult] = []
 
     for algorithm, solver in ALGORITHM_DISPATCH.items():
-        start = time.perf_counter()
-        path = solver(request.cities)
-        duration = (time.perf_counter() - start) * 1000
-        distance = get_total_distance(request.cities, path)
-        results.append(
-            AnalysisResult(
-                algorithm=ALGORITHM_LABELS[algorithm],
-                distance=distance,
-                path=path,
-                execution_time_ms=duration,
+        # ACO is stochastic - run multiple times and keep best result
+        if algorithm == AlgorithmType.ACO:
+            best_path = []
+            best_distance = float("inf")
+            total_duration = 0.0
+
+            for _ in range(ACO_RUNS):
+                start = time.perf_counter()
+                path = solver(request.cities)
+                duration = (time.perf_counter() - start) * 1000
+                total_duration += duration
+                distance = get_total_distance(request.cities, path)
+
+                if distance < best_distance:
+                    best_distance = distance
+                    best_path = path
+
+            results.append(
+                AnalysisResult(
+                    algorithm=ALGORITHM_LABELS[algorithm],
+                    distance=best_distance,
+                    path=best_path,
+                    execution_time_ms=total_duration,  # Total time for all runs
+                )
             )
-        )
+        else:
+            # Deterministic algorithms - run once
+            start = time.perf_counter()
+            path = solver(request.cities)
+            duration = (time.perf_counter() - start) * 1000
+            distance = get_total_distance(request.cities, path)
+            results.append(
+                AnalysisResult(
+                    algorithm=ALGORITHM_LABELS[algorithm],
+                    distance=distance,
+                    path=path,
+                    execution_time_ms=duration,
+                )
+            )
 
     return AnalyzeResponse(results=results)
 
