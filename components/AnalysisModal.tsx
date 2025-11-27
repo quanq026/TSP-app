@@ -132,15 +132,13 @@ const AnalysisModal: React.FC<AnalysisModalProps> = ({ isOpen, onClose, results,
   const sortedResults = [...results].sort((a, b) => a.distance - b.distance);
   const winner = sortedResults[0];
 
-  // Helper to get translated name
+  // Helper to get translated name using enum values
   const getAlgoName = (key: string) => {
-    // Attempt to match the string key back to the enum, or just display raw if not found
-    // Since we store raw string keys in AnalysisResult, we might need to map them.
-    // However, in App.tsx we should store the Enum value in results for cleaner mapping.
-    // For now, we'll try to map based on known strings or just show the string.
-    if (key === 'Nearest Neighbor') return t.algoNames[AlgorithmType.NEAREST_NEIGHBOR];
-    if (key === 'Ant Colony Opt.') return t.algoNames[AlgorithmType.ACO];
-    if (key === 'Space Filling Curve') return t.algoNames[AlgorithmType.SPACE_FILLING_CURVE];
+    // Backend now returns enum values (e.g., "NEAREST_NEIGHBOR")
+    const algoKey = key as AlgorithmType;
+    if (algoKey in AlgorithmType) {
+      return t.algoNames[algoKey] ?? key;
+    }
     return key;
   };
 

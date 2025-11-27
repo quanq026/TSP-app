@@ -25,9 +25,11 @@ from .schemas import (
 
 app = FastAPI(title="TSP Algorithms API", version="1.0.0")
 
+# TODO: For production, restrict origins to your actual domain
+# Example: allow_origins=["https://yourdomain.com"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Development only - restrict in production!
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,10 +42,11 @@ ALGORITHM_DISPATCH = {
     AlgorithmType.SPACE_FILLING_CURVE: solve_space_filling_curve,
 }
 
+# Use enum values for consistent frontend mapping
 ALGORITHM_LABELS = {
-    AlgorithmType.NEAREST_NEIGHBOR: "Nearest Neighbor",
-    AlgorithmType.ACO: "Ant Colony Opt.",
-    AlgorithmType.SPACE_FILLING_CURVE: "Space Filling Curve",
+    AlgorithmType.NEAREST_NEIGHBOR: AlgorithmType.NEAREST_NEIGHBOR.value,
+    AlgorithmType.ACO: AlgorithmType.ACO.value,
+    AlgorithmType.SPACE_FILLING_CURVE: AlgorithmType.SPACE_FILLING_CURVE.value,
 }
 
 

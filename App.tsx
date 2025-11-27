@@ -14,6 +14,10 @@ const STEP_DELAY_MS = 50;
 
 const ensureMinDimension = (value: number) => Math.max(value, MIN_DIMENSION);
 
+// Counter for unique city IDs (avoids Date.now() collision on rapid clicks)
+let cityIdCounter = 0;
+const getNextCityId = () => ++cityIdCounter;
+
 const App: React.FC = () => {
   const [cities, setCities] = useState<City[]>([]);
   const [path, setPath] = useState<number[]>([]);
@@ -23,6 +27,7 @@ const App: React.FC = () => {
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
   const [language, setLanguage] = useState<Language>('vi'); // Default to Vietnamese based on user language
+  const [error, setError] = useState<string | null>(null);
 
   // We store the calculated full path here to animate it step-by-step
   const targetPathRef = useRef<number[]>([]);
@@ -50,12 +55,13 @@ const App: React.FC = () => {
   const handleCanvasClick = useCallback(
     (x: number, y: number) => {
       const newCity: City = {
-        id: Date.now(),
+        id: getNextCityId(),
         x,
         y
       };
       setCities(prev => [...prev, newCity]);
       resetRunState();
+      setError(null);
     },
     [resetRunState]
   );
@@ -63,13 +69,19 @@ const App: React.FC = () => {
   const handleRandomize = useCallback(
     async (count: number) => {
       setIsComputing(true);
+      setError(null);
       try {
         const { width, height } = measureCanvas();
         const generated = await fetchRandomCities(count, width, height);
+        // Update counter to avoid ID collision with fetched cities
+        const maxId = Math.max(...generated.map(c => c.id), cityIdCounter);
+        cityIdCounter = maxId;
         setCities(generated);
         resetRunState();
-      } catch (error) {
-        console.error('Failed to fetch random cities', error);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to fetch random cities';
+        setError(message);
+        console.error('Failed to fetch random cities', err);
       } finally {
         setIsComputing(false);
       }
@@ -86,13 +98,16 @@ const App: React.FC = () => {
     if (cities.length < 2) return;
 
     setIsComputing(true);
+    setError(null);
     try {
       const result = await solveTsp(selectedAlgorithm, cities);
       targetPathRef.current = result.path;
       resetRunState();
       setIsRunning(true);
-    } catch (error) {
-      console.error('Failed to solve TSP', error);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to solve TSP';
+      setError(message);
+      console.error('Failed to solve TSP', err);
     } finally {
       setIsComputing(false);
     }
@@ -102,12 +117,15 @@ const App: React.FC = () => {
     if (cities.length < 3) return;
 
     setIsComputing(true);
+    setError(null);
     try {
       const results = await analyzeAlgorithms(cities);
       setAnalysisResults(results);
       setIsAnalysisOpen(true);
-    } catch (error) {
-      console.error('Failed to analyze algorithms', error);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to analyze algorithms';
+      setError(message);
+      console.error('Failed to analyze algorithms', err);
     } finally {
       setIsComputing(false);
     }
@@ -161,6 +179,18 @@ const App: React.FC = () => {
           <div className="absolute top-4 left-8 backdrop-blur px-4 py-2 rounded-lg text-xs pointer-events-none" style={{ backgroundColor: withOpacity(theme.colors.base, 0.8), border: `1px solid ${theme.colors.overlay}`, color: theme.colors.subtle }}>
             {t.algorithm}: <span className="font-bold" style={{ color: theme.colors.foam }}>{t.algoNames[selectedAlgorithm]}</span>
           </div>
+
+          {/* Error Toast */}
+          {error && (
+            <div
+              className="absolute bottom-4 left-4 right-4 p-3 rounded-lg text-sm flex items-center justify-between cursor-pointer"
+              style={{ backgroundColor: withOpacity(theme.colors.love, 0.9), color: theme.colors.text }}
+              onClick={() => setError(null)}
+            >
+              <span>⚠️ {error}</span>
+              <span className="text-xs opacity-70">Click to dismiss</span>
+            </div>
+          )}
         </div>
       </div>
 

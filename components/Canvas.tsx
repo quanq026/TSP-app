@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { City, Language } from '../types';
 import { translations } from '../utils/translations';
 import { theme, withOpacity } from '../utils/theme';
@@ -14,6 +14,9 @@ interface CanvasProps {
 const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning, language }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const t = translations[language];
+
+  // Performance: Create Map lookup once instead of O(n) find() per segment
+  const cityMap = useMemo(() => new Map(cities.map(c => [c.id, c])), [cities]);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isRunning) return;
@@ -36,8 +39,8 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
         {/* Draw Path */}
         {path.length > 1 && path.map((cityId, index) => {
           if (index === path.length - 1) return null;
-          const c1 = cities.find(c => c.id === cityId);
-          const c2 = cities.find(c => c.id === path[index + 1]);
+          const c1 = cityMap.get(cityId);
+          const c2 = cityMap.get(path[index + 1]);
           if (!c1 || !c2) return null;
           return (
             <line
@@ -56,10 +59,10 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
         {/* Draw Closing Line if complete */}
         {path.length === cities.length && cities.length > 1 && (
           <line
-            x1={cities.find(c => c.id === path[path.length - 1])?.x}
-            y1={cities.find(c => c.id === path[path.length - 1])?.y}
-            x2={cities.find(c => c.id === path[0])?.x}
-            y2={cities.find(c => c.id === path[0])?.y}
+            x1={cityMap.get(path[path.length - 1])?.x}
+            y1={cityMap.get(path[path.length - 1])?.y}
+            x2={cityMap.get(path[0])?.x}
+            y2={cityMap.get(path[0])?.y}
             stroke={theme.colors.foam}
             strokeWidth="2"
             strokeDasharray="5,5"
