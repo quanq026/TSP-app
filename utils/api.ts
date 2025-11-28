@@ -1,8 +1,8 @@
-import { AlgorithmType, AnalysisResult, City } from '../types';
+import { AlgorithmType, AnalysisResult, City, SFCDebugData } from '../types';
 
-// const DEFAULT_API_URL = 'http://localhost:8000';
-// const API_BASE_URL = (import.meta as any)?.env?.VITE_API_URL ?? DEFAULT_API_URL;
-const API_BASE_URL = 'https://tsp-app.onrender.com';
+const DEFAULT_API_URL = 'http://localhost:8000';
+const API_BASE_URL = (import.meta as any)?.env?.VITE_API_URL ?? DEFAULT_API_URL;
+// const API_BASE_URL = 'https://tsp-app.onrender.com';
 
 const withBase = (path: string) => {
     const normalized = path.startsWith('/') ? path : `/${path}`;
@@ -94,5 +94,18 @@ export const analyzeAlgorithms = async (cities: City[]): Promise<AnalysisResult[
         path: result.path,
         executionTime: result.execution_time_ms,
     }));
+};
+
+export const fetchSFCDebugInfo = async (
+    cities: City[],
+    canvasWidth: number = 800,
+    canvasHeight: number = 600
+): Promise<SFCDebugData> => {
+    const response = await fetch(withBase('/sfc/debug'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cities, canvas_width: canvasWidth, canvas_height: canvasHeight }),
+    });
+    return handleResponse<SFCDebugData>(response);
 };
 

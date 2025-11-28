@@ -23,6 +23,8 @@ export const translations = {
       [AlgorithmType.ACO]: "Simulates ants searching for food. Uses pheromones to find better paths over time. Strong meta-heuristic.",
       [AlgorithmType.SPACE_FILLING_CURVE]: "Maps 2D points to a 1D Hilbert Curve. Sorts cities by this 1D index. Very fast spatial clustering."
     },
+    sfcDebugOn: "Debug Hilbert",
+    sfcDebugOff: "Hide Debug",
     analysis: {
       title: "Analysis Results",
       winnerTitle: "Most Efficient Route",
@@ -56,6 +58,8 @@ export const translations = {
       [AlgorithmType.ACO]: "Mô phỏng loài kiến tìm thức ăn. Sử dụng mùi hương (pheromone) để tìm đường tốt hơn theo thời gian.",
       [AlgorithmType.SPACE_FILLING_CURVE]: "Ánh xạ điểm 2D sang đường cong Hilbert 1D. Sắp xếp thành phố theo chỉ số này. Rất nhanh."
     },
+    sfcDebugOn: "Debug Hilbert",
+    sfcDebugOff: "Tắt Debug",
     analysis: {
       title: "Kết Quả Phân Tích",
       winnerTitle: "Lộ trình hiệu quả nhất",

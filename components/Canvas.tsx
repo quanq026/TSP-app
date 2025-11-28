@@ -1,7 +1,8 @@
 import React, { useRef, useMemo } from 'react';
-import { City, Language } from '../types';
+import { City, Language, SFCDebugData } from '../types';
 import { translations } from '../utils/translations';
 import { theme, withOpacity } from '../utils/theme';
+import SFCDebugOverlay from './SFCDebugOverlay';
 
 interface CanvasProps {
   cities: City[];
@@ -9,9 +10,10 @@ interface CanvasProps {
   onCanvasClick: (x: number, y: number) => void;
   isRunning: boolean;
   language: Language;
+  sfcDebugData?: SFCDebugData | null;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning, language }) => {
+const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning, language, sfcDebugData }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const t = translations[language];
 
@@ -67,6 +69,15 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
             strokeWidth="2"
             strokeDasharray="5,5"
             className="opacity-50"
+          />
+        )}
+
+        {/* SFC Debug Overlay */}
+        {sfcDebugData && (
+          <SFCDebugOverlay
+            debugData={sfcDebugData}
+            canvasWidth={containerRef.current?.clientWidth ?? 800}
+            canvasHeight={containerRef.current?.clientHeight ?? 600}
           />
         )}
 

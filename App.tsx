@@ -2,9 +2,9 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import Canvas from './components/Canvas';
 import ControlPanel from './components/ControlPanel';
 import AnalysisModal from './components/AnalysisModal';
-import { City, AlgorithmType, AnalysisResult, Language } from './types';
+import { City, AlgorithmType, AnalysisResult, Language, SFCDebugData } from './types';
 import { translations } from './utils/translations';
-import { fetchRandomCities, solveTsp, analyzeAlgorithms } from './utils/api';
+import { fetchRandomCities, solveTsp, analyzeAlgorithms, fetchSFCDebugInfo } from './utils/api';
 import { getTotalDistance } from './utils/geometry';
 import { theme, withOpacity } from './utils/theme';
 
@@ -28,6 +28,8 @@ const App: React.FC = () => {
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
   const [language, setLanguage] = useState<Language>('vi'); // Default to Vietnamese based on user language
   const [error, setError] = useState<string | null>(null);
+  const [sfcDebugData, setSfcDebugData] = useState<SFCDebugData | null>(null);
+  const [showSFCDebug, setShowSFCDebug] = useState(false);
 
   // We store the calculated full path here to animate it step-by-step
   const targetPathRef = useRef<number[]>([]);
@@ -92,7 +94,31 @@ const App: React.FC = () => {
   const handleClear = useCallback(() => {
     setCities([]);
     resetRunState();
+    setSfcDebugData(null);
+    setShowSFCDebug(false);
   }, [resetRunState]);
+
+  const handleToggleSFCDebug = useCallback(async () => {
+    if (showSFCDebug) {
+      // Turn off debug
+      setSfcDebugData(null);
+      setShowSFCDebug(false);
+    } else {
+      // Turn on debug - fetch debug data
+      if (cities.length < 2) return;
+      setIsComputing(true);
+      try {
+        const { width, height } = measureCanvas();
+        const debugInfo = await fetchSFCDebugInfo(cities, width, height);
+        setSfcDebugData(debugInfo);
+        setShowSFCDebug(true);
+      } catch (err) {
+        console.error('Failed to fetch SFC debug info', err);
+      } finally {
+        setIsComputing(false);
+      }
+    }
+  }, [showSFCDebug, cities, measureCanvas]);
 
   const runVisualization = useCallback(async () => {
     if (cities.length < 2) return;
@@ -173,6 +199,7 @@ const App: React.FC = () => {
               onCanvasClick={handleCanvasClick}
               isRunning={isBusy}
               language={language}
+              sfcDebugData={showSFCDebug ? sfcDebugData : null}
             />
           </div>
 
@@ -202,11 +229,13 @@ const App: React.FC = () => {
         onAlgorithmChange={setSelectedAlgorithm}
         onAnalyze={handleAnalyze}
         onLanguageChange={setLanguage}
+        onToggleSFCDebug={handleToggleSFCDebug}
         selectedAlgorithm={selectedAlgorithm}
         isRunning={isBusy}
         cityCount={cities.length}
         totalDistance={getTotalDistance(cities, path)}
         language={language}
+        showSFCDebug={showSFCDebug}
       />
 
       {/* Analysis Modal */}

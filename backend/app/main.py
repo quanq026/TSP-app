@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .algorithms import (
     get_total_distance,
+    get_sfc_debug_info,
     solve_ant_colony,
     solve_nearest_neighbor,
     solve_space_filling_curve,
@@ -19,6 +20,8 @@ from .schemas import (
     AnalyzeResponse,
     AnalysisResult,
     RandomCitiesResponse,
+    SFCDebugRequest,
+    SFCDebugResponse,
     SolveRequest,
     SolveResponse,
 )
@@ -175,4 +178,14 @@ def analyze_algorithms(request: AnalyzeRequest) -> AnalyzeResponse:
             )
 
     return AnalyzeResponse(results=results)
+
+
+@app.post("/sfc/debug", response_model=SFCDebugResponse)
+def sfc_debug(request: SFCDebugRequest) -> SFCDebugResponse:
+    """Return debug information for Space Filling Curve algorithm."""
+    if not request.cities:
+        raise HTTPException(status_code=400, detail="No cities provided")
+
+    debug_info = get_sfc_debug_info(request.cities, request.canvas_width, request.canvas_height)
+    return SFCDebugResponse(**debug_info)
 

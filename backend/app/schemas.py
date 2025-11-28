@@ -47,3 +47,32 @@ class AnalyzeResponse(BaseModel):
 class RandomCitiesResponse(BaseModel):
     cities: List[City]
 
+
+class SFCCityDebug(BaseModel):
+    city_id: int
+    x: float
+    y: float
+    normalized_x: int
+    normalized_y: int
+    hilbert_distance: int
+    order: int
+
+
+class SFCDebugRequest(BaseModel):
+    cities: List[City]
+    canvas_width: float = 800
+    canvas_height: float = 600
+
+
+class HilbertPoint(BaseModel):
+    x: float
+    y: float
+
+
+class SFCDebugResponse(BaseModel):
+    cities_debug: List[SFCCityDebug]
+    max_coord: float
+    grid_size: int
+    hilbert_path: List[HilbertPoint]
+    display_grid_size: int
+

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, RotateCcw, Trash2, Activity, Globe } from 'lucide-react';
+import { Play, RotateCcw, Trash2, Activity, Globe, Bug } from 'lucide-react';
 import { AlgorithmType, Language } from '../types';
 import { translations } from '../utils/translations';
 import { theme, withOpacity } from '../utils/theme';
@@ -11,11 +11,13 @@ interface ControlPanelProps {
   onAlgorithmChange: (algo: AlgorithmType) => void;
   onAnalyze: () => void;
   onLanguageChange: (lang: Language) => void;
+  onToggleSFCDebug: () => void;
   selectedAlgorithm: AlgorithmType;
   isRunning: boolean;
   cityCount: number;
   totalDistance: number;
   language: Language;
+  showSFCDebug: boolean;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -25,11 +27,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onAlgorithmChange,
   onAnalyze,
   onLanguageChange,
+  onToggleSFCDebug,
   selectedAlgorithm,
   isRunning,
   cityCount,
   totalDistance,
-  language
+  language,
+  showSFCDebug,
 }) => {
   // Use string state to allow empty input during typing
   const [inputValue, setInputValue] = useState<string>("30");
@@ -115,6 +119,24 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <p className="mt-2 text-xs italic leading-relaxed" style={{ color: theme.colors.muted }}>
             {t.algoDescriptions[selectedAlgorithm]}
           </p>
+
+          {/* SFC Debug Button - only show when SFC is selected */}
+          {selectedAlgorithm === AlgorithmType.SPACE_FILLING_CURVE && (
+            <button
+              onClick={onToggleSFCDebug}
+              disabled={isRunning || cityCount < 2}
+              className="mt-3 flex items-center justify-center gap-2 p-2 rounded-lg text-sm font-medium transition-all w-full"
+              style={showSFCDebug
+                ? { backgroundColor: withOpacity(theme.colors.iris, 0.2), color: theme.colors.iris, border: `1px solid ${theme.colors.iris}` }
+                : { backgroundColor: theme.colors.overlay, color: theme.colors.subtle, border: `1px solid transparent` }
+              }
+              onMouseEnter={(e) => { if (!isRunning && cityCount >= 2) e.currentTarget.style.backgroundColor = withOpacity(theme.colors.iris, 0.15); }}
+              onMouseLeave={(e) => { if (!isRunning && cityCount >= 2) e.currentTarget.style.backgroundColor = showSFCDebug ? withOpacity(theme.colors.iris, 0.2) : theme.colors.overlay; }}
+            >
+              <Bug size={16} />
+              {showSFCDebug ? (t.sfcDebugOff || 'Hide Debug') : (t.sfcDebugOn || 'Debug Hilbert')}
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">

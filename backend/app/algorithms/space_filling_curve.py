@@ -56,3 +56,73 @@ def solve_space_filling_curve(cities: List[City]) -> List[int]:
     path = [city_id for _, city_id in enriched]
     return normalize_path(path, cities[0].id)
 
+
+def _hilbert_d2xy(size: int, d: int) -> Tuple[int, int]:
+    """Convert Hilbert distance back to (x, y) coordinates."""
+    x = y = 0
+    step = 1
+    while step < size:
+        rx = 1 & (d // 2)
+        ry = 1 & (d ^ rx)
+        if ry == 0:
+            if rx == 1:
+                x = step - 1 - x
+                y = step - 1 - y
+            x, y = y, x
+        x += step * rx
+        y += step * ry
+        d //= 4
+        step *= 2
+    return x, y
+
+
+def get_sfc_debug_info(cities: List[City], canvas_width: float = 800, canvas_height: float = 600) -> dict:
+    """Return debug information for visualizing the Hilbert curve ordering."""
+    if not cities:
+        return {"cities_debug": [], "max_coord": 0, "grid_size": GRID_SIZE, "hilbert_path": []}
+
+    max_coord = max(max(city.x for city in cities), max(city.y for city in cities), 1)
+
+    cities_debug = []
+    for city in cities:
+        nx, ny = _normalize_coords(city, max_coord)
+        hilbert_value = _hilbert_distance(GRID_SIZE, nx, ny)
+        cities_debug.append({
+            "city_id": city.id,
+            "x": city.x,
+            "y": city.y,
+            "normalized_x": nx,
+            "normalized_y": ny,
+            "hilbert_distance": hilbert_value,
+        })
+
+    # Sort by hilbert distance and add order
+    cities_debug.sort(key=lambda item: item["hilbert_distance"])
+    for i, item in enumerate(cities_debug):
+        item["order"] = i + 1
+
+    # Generate Hilbert curve path for visualization (use smaller grid for display)
+    display_grid_order = 4  # 2^4 = 16x16 grid
+    display_grid_size = 2 ** display_grid_order
+    total_cells = display_grid_size * display_grid_size
+    
+    # Calculate cell size based on canvas
+    cell_width = canvas_width / display_grid_size
+    cell_height = canvas_height / display_grid_size
+    
+    hilbert_path = []
+    for d in range(total_cells):
+        gx, gy = _hilbert_d2xy(display_grid_size, d)
+        # Convert grid coords to canvas coords (center of each cell)
+        px = (gx + 0.5) * cell_width
+        py = (gy + 0.5) * cell_height
+        hilbert_path.append({"x": px, "y": py})
+
+    return {
+        "cities_debug": cities_debug,
+        "max_coord": max_coord,
+        "grid_size": GRID_SIZE,
+        "hilbert_path": hilbert_path,
+        "display_grid_size": display_grid_size,
+    }
+
