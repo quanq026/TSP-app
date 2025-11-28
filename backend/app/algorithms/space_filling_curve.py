@@ -96,10 +96,23 @@ def get_sfc_debug_info(cities: List[City], canvas_width: float = 800, canvas_hei
             "hilbert_distance": hilbert_value,
         })
 
-    # Sort by hilbert distance and add order
+    # Sort by hilbert distance
     cities_debug.sort(key=lambda item: item["hilbert_distance"])
+    
+    # Find where the first city (cities[0]) is in the sorted list
+    first_city_id = cities[0].id
+    start_index = 0
     for i, item in enumerate(cities_debug):
-        item["order"] = i + 1
+        if item["city_id"] == first_city_id:
+            start_index = i
+            break
+    
+    # Assign order starting from the first city (rotate the order)
+    n = len(cities_debug)
+    for i in range(n):
+        # Rotate so first city gets order 1
+        rotated_index = (i - start_index) % n
+        cities_debug[i]["order"] = rotated_index + 1
 
     # Generate Hilbert curve path for visualization (use smaller grid for display)
     display_grid_order = 4  # 2^4 = 16x16 grid
