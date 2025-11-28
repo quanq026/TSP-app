@@ -37,3 +37,5 @@ Toàn bộ thao tác (random điểm, chạy thuật toán, phân tích) đều 
 - `backend/app/algorithms/`: các thuật toán (Nearest Neighbor, Ant Colony, Space Filling Curve) viết lại bằng Python.
 - `backend/app/main.py`: FastAPI entrypoint, định nghĩa routes và wiring giữa frontend/backed.
 
+##
+- Have fun visualizing TSP algorithms!
