@@ -81,23 +81,23 @@ const SFCDebugPanel: React.FC<SFCDebugPanelProps> = ({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-2 lg:p-4"
             style={{ backgroundColor: withOpacity(theme.colors.base, 0.8) }}
             onClick={onClose}
         >
             <div
-                className="w-full max-w-4xl max-h-[90vh] rounded-xl overflow-hidden shadow-2xl flex flex-col"
+                className="w-full max-w-4xl h-full lg:h-auto lg:max-h-[90vh] rounded-xl overflow-hidden shadow-2xl flex flex-col"
                 style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.overlay}` }}
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="p-4 border-b" style={{ borderColor: theme.colors.overlay }}>
+                <div className="p-3 lg:p-4 border-b" style={{ borderColor: theme.colors.overlay }}>
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-xl font-bold" style={{ color: theme.colors.foam }}>
+                            <h2 className="text-lg lg:text-xl font-bold" style={{ color: theme.colors.foam }}>
                                 {t.title}
                             </h2>
-                            <p className="text-sm mt-1" style={{ color: theme.colors.muted }}>
+                            <p className="text-xs lg:text-sm mt-1 hidden sm:block" style={{ color: theme.colors.muted }}>
                                 {t.subtitle}
                             </p>
                         </div>
@@ -112,7 +112,7 @@ const SFCDebugPanel: React.FC<SFCDebugPanelProps> = ({
                 </div>
 
                 {/* Steps Explanation */}
-                <div className="p-4 grid grid-cols-3 gap-3 border-b" style={{ borderColor: theme.colors.overlay }}>
+                <div className="p-2 lg:p-4 grid grid-cols-1 sm:grid-cols-3 gap-2 lg:gap-3 border-b" style={{ borderColor: theme.colors.overlay }}>
                     <StepCard
                         number={1}
                         title={t.step1Title}
@@ -137,8 +137,8 @@ const SFCDebugPanel: React.FC<SFCDebugPanelProps> = ({
                 </div>
 
                 {/* Data Table */}
-                <div className="flex-1 overflow-auto p-4">
-                    <table className="w-full text-sm">
+                <div className="flex-1 overflow-auto p-2 lg:p-4">
+                    <table className="w-full text-xs lg:text-sm">
                         <thead>
                             <tr style={{ color: theme.colors.subtle }}>
                                 <th className="text-left p-2 sticky top-0" style={{ backgroundColor: theme.colors.surface }}>
@@ -147,10 +147,10 @@ const SFCDebugPanel: React.FC<SFCDebugPanelProps> = ({
                                 <th className="text-left p-2 sticky top-0" style={{ backgroundColor: theme.colors.surface }}>
                                     {t.tableHeaders.city}
                                 </th>
-                                <th className="text-left p-2 sticky top-0" style={{ backgroundColor: theme.colors.surface }}>
+                                <th className="text-left p-2 sticky top-0 hidden sm:table-cell" style={{ backgroundColor: theme.colors.surface }}>
                                     {t.tableHeaders.original}
                                 </th>
-                                <th className="text-left p-2 sticky top-0" style={{ backgroundColor: theme.colors.surface }}>
+                                <th className="text-left p-2 sticky top-0 hidden lg:table-cell" style={{ backgroundColor: theme.colors.surface }}>
                                     {t.tableHeaders.normalized}
                                 </th>
                                 <th className="text-right p-2 sticky top-0" style={{ backgroundColor: theme.colors.surface }}>
@@ -185,10 +185,10 @@ const SFCDebugPanel: React.FC<SFCDebugPanelProps> = ({
                                             {cities.findIndex(c => c.id === info.cityId) + 1}
                                         </span>
                                     </td>
-                                    <td className="p-2 font-mono text-xs">
+                                    <td className="p-2 font-mono text-xs hidden sm:table-cell">
                                         ({Math.round(info.originalX)}, {Math.round(info.originalY)})
                                     </td>
-                                    <td className="p-2 font-mono text-xs" style={{ color: theme.colors.iris }}>
+                                    <td className="p-2 font-mono text-xs hidden lg:table-cell" style={{ color: theme.colors.iris }}>
                                         ({info.normalizedX}, {info.normalizedY})
                                     </td>
                                     <td className="p-2 text-right font-mono" style={{ color: theme.colors.foam }}>
@@ -201,11 +201,11 @@ const SFCDebugPanel: React.FC<SFCDebugPanelProps> = ({
                 </div>
 
                 {/* Footer Explanation */}
-                <div className="p-4 border-t" style={{ borderColor: theme.colors.overlay, backgroundColor: withOpacity(theme.colors.pine, 0.1) }}>
-                    <h4 className="font-bold mb-2" style={{ color: theme.colors.gold }}>
+                <div className="p-3 lg:p-4 border-t" style={{ borderColor: theme.colors.overlay, backgroundColor: withOpacity(theme.colors.pine, 0.1) }}>
+                    <h4 className="font-bold mb-1 lg:mb-2 text-sm lg:text-base" style={{ color: theme.colors.gold }}>
                         💡 {t.whyThisOrder}
                     </h4>
-                    <p className="text-sm" style={{ color: theme.colors.subtle }}>
+                    <p className="text-xs lg:text-sm" style={{ color: theme.colors.subtle }}>
                         {t.explanation}
                     </p>
                 </div>
@@ -224,28 +224,30 @@ interface StepCardProps {
 
 const StepCard: React.FC<StepCardProps> = ({ number, title, description, icon, isActive }) => (
     <div
-        className="p-3 rounded-lg transition-all duration-300"
+        className="p-2 lg:p-3 rounded-lg transition-all duration-300 flex sm:flex-col items-center sm:items-start gap-2 sm:gap-0"
         style={{
             backgroundColor: isActive ? withOpacity(theme.colors.pine, 0.2) : withOpacity(theme.colors.overlay, 0.3),
             border: `1px solid ${isActive ? theme.colors.pine : theme.colors.overlay}`,
             opacity: isActive ? 1 : 0.6
         }}
     >
-        <div className="flex items-center gap-2 mb-1">
-            <span className="text-lg">{icon}</span>
+        <div className="flex items-center gap-2 sm:mb-1">
+            <span className="text-base lg:text-lg">{icon}</span>
             <span
-                className="text-xs font-bold px-2 py-0.5 rounded"
+                className="text-[10px] lg:text-xs font-bold px-1.5 lg:px-2 py-0.5 rounded"
                 style={{ backgroundColor: theme.colors.pine, color: theme.colors.text }}
             >
                 {number}
             </span>
         </div>
-        <h4 className="font-medium text-sm" style={{ color: theme.colors.text }}>
-            {title}
-        </h4>
-        <p className="text-xs mt-1" style={{ color: theme.colors.muted }}>
-            {description}
-        </p>
+        <div className="flex-1 sm:flex-none">
+            <h4 className="font-medium text-xs lg:text-sm" style={{ color: theme.colors.text }}>
+                {title}
+            </h4>
+            <p className="text-[10px] lg:text-xs mt-0.5 lg:mt-1 hidden sm:block" style={{ color: theme.colors.muted }}>
+                {description}
+            </p>
+        </div>
     </div>
 );
 

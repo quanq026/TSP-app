@@ -11,6 +11,7 @@ interface CanvasProps {
   isRunning: boolean;
   language: Language;
   showHilbertCurve?: boolean;
+  showSFCOrder?: boolean;
   highlightedCityId?: number | null;
   selectedAlgorithm?: AlgorithmType;
 }
@@ -22,6 +23,7 @@ const Canvas: React.FC<CanvasProps> = ({
   isRunning,
   language,
   showHilbertCurve = false,
+  showSFCOrder = false,
   highlightedCityId = null,
   selectedAlgorithm
 }) => {
@@ -64,8 +66,9 @@ const Canvas: React.FC<CanvasProps> = ({
           <path
             d={`M ${hilbertCurvePoints.map(p => `${p.x},${p.y}`).join(' L ')}`}
             fill="none"
-            stroke={withOpacity(theme.colors.iris, 0.3)}
-            strokeWidth="1"
+            stroke={theme.colors.gold}
+            strokeWidth="1.5"
+            opacity={0.6}
             className="transition-opacity duration-500"
           />
         )}
@@ -134,8 +137,8 @@ const Canvas: React.FC<CanvasProps> = ({
                 fill={isStart ? theme.colors.pine : isCurrent ? theme.colors.gold : isVisited ? theme.colors.foam : theme.colors.love}
                 className="transition-all duration-300"
               />
-              {/* Show SFC order when in SFC mode */}
-              {sfcOrder !== undefined && selectedAlgorithm === AlgorithmType.SPACE_FILLING_CURVE && (
+              {/* Show SFC order when toggled */}
+              {showSFCOrder && sfcOrder !== undefined && selectedAlgorithm === AlgorithmType.SPACE_FILLING_CURVE && (
                 <g>
                   <circle
                     cx={city.x + 12}
@@ -159,11 +162,11 @@ const Canvas: React.FC<CanvasProps> = ({
                 </g>
               )}
               <text
-                x={city.x + (sfcOrder !== undefined ? -12 : 10)}
+                x={city.x + (showSFCOrder && sfcOrder !== undefined ? -12 : 10)}
                 y={city.y + 4}
                 fill={withOpacity(theme.colors.text, 0.7)}
                 fontSize="10"
-                textAnchor={sfcOrder !== undefined ? 'end' : 'start'}
+                textAnchor={showSFCOrder && sfcOrder !== undefined ? 'end' : 'start'}
                 className="pointer-events-none select-none"
               >
                 {index + 1}

@@ -16,6 +16,12 @@ interface ControlPanelProps {
   cityCount: number;
   totalDistance: number;
   language: Language;
+  // SFC Debug controls
+  showHilbertCurve?: boolean;
+  showSFCOrder?: boolean;
+  onToggleHilbertCurve?: () => void;
+  onToggleSFCOrder?: () => void;
+  onOpenSFCDebug?: () => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -29,7 +35,12 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   isRunning,
   cityCount,
   totalDistance,
-  language
+  language,
+  showHilbertCurve = false,
+  showSFCOrder = false,
+  onToggleHilbertCurve,
+  onToggleSFCOrder,
+  onOpenSFCDebug
 }) => {
   const [inputValue, setInputValue] = useState<string>("30");
   const t = translations[language];
@@ -58,13 +69,14 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   return (
-    <div className="w-full lg:w-80 p-6 flex flex-col gap-6 h-full overflow-y-auto" style={{ backgroundColor: theme.colors.surface, borderLeft: `1px solid ${theme.colors.overlay}` }}>
+    <div className="w-full lg:w-72 xl:w-80 p-3 lg:p-5 flex flex-col gap-3 lg:gap-4 flex-1 lg:flex-none lg:h-full overflow-y-auto shrink-0" style={{ backgroundColor: theme.colors.surface, borderTop: `1px solid ${theme.colors.overlay}` }}>
+      {/* Sidebar: full width on mobile, fixed width on desktop */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-2xl font-bold mb-2" style={{ background: `linear-gradient(to right, ${theme.colors.pine}, ${theme.colors.foam})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          <h1 className="text-xl lg:text-2xl font-bold mb-1 lg:mb-2" style={{ background: `linear-gradient(to right, ${theme.colors.pine}, ${theme.colors.foam})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             {t.title}
           </h1>
-          <p className="text-sm" style={{ color: theme.colors.subtle }}>
+          <p className="text-xs lg:text-sm hidden lg:block" style={{ color: theme.colors.subtle }}>
             {t.subtitle}
           </p>
         </div>
@@ -92,7 +104,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2 lg:space-y-4">
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: theme.colors.subtle }}>{t.algorithm}</label>
           <select
@@ -111,9 +123,50 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <p className="mt-2 text-xs italic leading-relaxed" style={{ color: theme.colors.muted }}>
             {t.algoDescriptions[selectedAlgorithm]}
           </p>
+
+          {/* SFC Debug Controls */}
+          {selectedAlgorithm === AlgorithmType.SPACE_FILLING_CURVE && cityCount >= 2 && (
+            <div className="mt-3 flex flex-col gap-2">
+              <div className="flex gap-2">
+                <button
+                  onClick={onToggleHilbertCurve}
+                  className="flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                  style={{
+                    backgroundColor: showHilbertCurve ? withOpacity(theme.colors.gold, 0.3) : theme.colors.base,
+                    border: `1px solid ${showHilbertCurve ? theme.colors.gold : theme.colors.overlay}`,
+                    color: showHilbertCurve ? theme.colors.gold : theme.colors.subtle
+                  }}
+                >
+                  🌀 {showHilbertCurve ? 'Ẩn Hilbert' : 'Hiện Hilbert'}
+                </button>
+                <button
+                  onClick={onToggleSFCOrder}
+                  className="flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                  style={{
+                    backgroundColor: showSFCOrder ? withOpacity(theme.colors.iris, 0.3) : theme.colors.base,
+                    border: `1px solid ${showSFCOrder ? theme.colors.iris : theme.colors.overlay}`,
+                    color: showSFCOrder ? theme.colors.iris : theme.colors.subtle
+                  }}
+                >
+                  🔢 {showSFCOrder ? 'Ẩn thứ tự' : 'Hiện thứ tự'}
+                </button>
+              </div>
+              <button
+                onClick={onOpenSFCDebug}
+                className="w-full px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                style={{
+                  backgroundColor: withOpacity(theme.colors.pine, 0.2),
+                  border: `1px solid ${theme.colors.pine}`,
+                  color: theme.colors.pine
+                }}
+              >
+                🔍 Debug SFC - Xem chi tiết
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 lg:gap-3">
           <div className="p-3 rounded-lg" style={{ backgroundColor: withOpacity(theme.colors.overlay, 0.5) }}>
             <span className="text-xs block" style={{ color: theme.colors.subtle }}>{t.cities}</span>
             <span className="text-xl font-mono font-semibold" style={{ color: theme.colors.text }}>{cityCount}</span>
@@ -127,11 +180,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2 lg:gap-3">
         <button
           onClick={onRun}
           disabled={isRunning || cityCount < 2}
-          className="flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition-all"
+          className="flex items-center justify-center gap-2 p-2 lg:p-3 rounded-lg font-medium text-sm lg:text-base transition-all"
           style={isRunning || cityCount < 2
             ? { backgroundColor: theme.colors.overlay, color: theme.colors.muted, cursor: 'not-allowed' }
             : { backgroundColor: theme.colors.pine, color: theme.colors.text }
@@ -146,7 +199,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         <button
           onClick={onAnalyze}
           disabled={isRunning || cityCount < 3}
-          className="flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition-all border"
+          className="flex items-center justify-center gap-2 p-2 lg:p-3 rounded-lg font-medium text-sm lg:text-base transition-all border"
           style={isRunning || cityCount < 3
             ? { borderColor: theme.colors.overlay, color: theme.colors.muted, cursor: 'not-allowed' }
             : { borderColor: withOpacity(theme.colors.foam, 0.5), color: theme.colors.foam }
@@ -172,7 +225,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 e.currentTarget.style.borderColor = theme.colors.muted;
               }}
               disabled={isRunning}
-              className="w-full rounded-lg p-3 outline-none text-center transition-colors"
+              className="w-full rounded-lg p-2 lg:p-3 outline-none text-center transition-colors"
               style={{ backgroundColor: theme.colors.base, border: `1px solid ${theme.colors.muted}`, color: theme.colors.text }}
               onFocus={(e) => e.currentTarget.style.borderColor = theme.colors.pine}
               title="Number of cities"
@@ -181,7 +234,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <button
             onClick={handleRandomizeClick}
             disabled={isRunning}
-            className="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg transition-all"
+            className="flex-1 flex items-center justify-center gap-2 p-2 lg:p-3 rounded-lg text-sm lg:text-base transition-all"
             style={{ backgroundColor: theme.colors.overlay, color: theme.colors.text }}
             onMouseEnter={(e) => { if (!isRunning) e.currentTarget.style.backgroundColor = theme.colors.highlightMed; }}
             onMouseLeave={(e) => { if (!isRunning) e.currentTarget.style.backgroundColor = theme.colors.overlay; }}
