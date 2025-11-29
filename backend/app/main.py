@@ -25,11 +25,9 @@ from .schemas import (
 
 app = FastAPI(title="TSP Algorithms API", version="1.0.0")
 
-# TODO: For production, restrict origins to your actual domain
-# Example: allow_origins=["https://yourdomain.com"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Development only - restrict in production!
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -42,17 +40,13 @@ ALGORITHM_DISPATCH = {
     AlgorithmType.SPACE_FILLING_CURVE: solve_space_filling_curve,
 }
 
-# Use enum values for consistent frontend mapping
 ALGORITHM_LABELS = {
     AlgorithmType.NEAREST_NEIGHBOR: AlgorithmType.NEAREST_NEIGHBOR.value,
     AlgorithmType.ACO: AlgorithmType.ACO.value,
     AlgorithmType.SPACE_FILLING_CURVE: AlgorithmType.SPACE_FILLING_CURVE.value,
 }
 
-# ACO is stochastic - run a few times with different random seeds and keep best
-# Note: Main optimization happens INSIDE ACO (150 iterations with pheromone accumulation)
-# These runs are for different random starting points only
-ACO_RUNS = 2
+ACO_RUNS = 3
 
 
 @app.get("/health")
@@ -88,7 +82,6 @@ def solve_tsp(request: SolveRequest) -> SolveResponse:
     if solver is None:
         raise HTTPException(status_code=400, detail="Unsupported algorithm")
 
-    # ACO is stochastic - run multiple times and keep best result
     if request.algorithm == AlgorithmType.ACO:
         best_path = []
         best_distance = float("inf")
@@ -112,7 +105,6 @@ def solve_tsp(request: SolveRequest) -> SolveResponse:
             execution_time_ms=total_duration,
         )
     else:
-        # Deterministic algorithms - run once
         start = time.perf_counter()
         path = solver(request.cities)
         duration = (time.perf_counter() - start) * 1000
@@ -134,7 +126,6 @@ def analyze_algorithms(request: AnalyzeRequest) -> AnalyzeResponse:
     results: list[AnalysisResult] = []
 
     for algorithm, solver in ALGORITHM_DISPATCH.items():
-        # ACO is stochastic - run multiple times and keep best result
         if algorithm == AlgorithmType.ACO:
             best_path = []
             best_distance = float("inf")
@@ -156,11 +147,10 @@ def analyze_algorithms(request: AnalyzeRequest) -> AnalyzeResponse:
                     algorithm=ALGORITHM_LABELS[algorithm],
                     distance=best_distance,
                     path=best_path,
-                    execution_time_ms=total_duration,  # Total time for all runs
+                    execution_time_ms=total_duration,
                 )
             )
         else:
-            # Deterministic algorithms - run once
             start = time.perf_counter()
             path = solver(request.cities)
             duration = (time.perf_counter() - start) * 1000

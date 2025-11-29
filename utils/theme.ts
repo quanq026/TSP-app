@@ -1,6 +1,3 @@
-// Theme Configuration
-// Chỉ cần thay đổi theme name ở đây để chuyển đổi toàn bộ ứng dụng
-
 export type ThemeName = 'rosePine' | 'rosePineDawn' | 'moonlight' | 'materialDeprecated';
 
 export interface Theme {
@@ -35,7 +32,6 @@ export interface Theme {
     };
 }
 
-// Rosé Pine (Base - Dark)
 const rosePine: Theme = {
     name: 'Rosé Pine',
     colors: {
@@ -61,7 +57,6 @@ const rosePine: Theme = {
     },
 };
 
-// Material Theme — Deprecated by Material Theme
 const materialDeprecated: Theme = {
     name: 'Material Theme — Deprecated by Material Theme',
     colors: {
@@ -87,7 +82,6 @@ const materialDeprecated: Theme = {
     },
 };
 
-// Rosé Pine Dawn (Light variant)
 const rosePineDawn: Theme = {
     name: 'Rosé Pine Dawn',
     colors: {
@@ -113,7 +107,6 @@ const rosePineDawn: Theme = {
     },
 };
 
-// Moonlight by atomiks
 const moonlight: Theme = {
     name: 'Moonlight',
     colors: {
@@ -139,7 +132,6 @@ const moonlight: Theme = {
     },
 };
 
-// Theme registry
 const themes: Record<ThemeName, Theme> = {
     rosePine,
     rosePineDawn,
@@ -147,21 +139,15 @@ const themes: Record<ThemeName, Theme> = {
     materialDeprecated,
 };
 
-// ============================================
-// CHỈ CẦN THAY ĐỔI DÒNG NÀY ĐỂ CHUYỂN THEME
-// ============================================
 export const CURRENT_THEME: ThemeName = 'materialDeprecated';
 
-// Export current theme
 export const theme = themes[CURRENT_THEME];
 
-// Helper functions for common color operations
 export const getTheme = (themeName: ThemeName = CURRENT_THEME): Theme => {
     return themes[themeName];
 };
 
 export const withOpacity = (color: string, opacity: number): string => {
-    // Convert hex to rgba
     const hex = color.replace('#', '');
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);

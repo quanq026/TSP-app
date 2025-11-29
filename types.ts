@@ -9,7 +9,7 @@ export interface City extends Point {
 
 export interface TSPState {
   cities: City[];
-  path: number[]; // Array of city IDs
+  path: number[];
   currentDistance: number;
   isRunning: boolean;
   step: number;

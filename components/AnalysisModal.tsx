@@ -13,7 +13,6 @@ interface AnalysisModalProps {
 }
 
 const PathPreview: React.FC<{ cities: City[]; path: number[]; color: string }> = ({ cities, path, color }) => {
-  // Calculate bounding box to create a perfect viewBox
   const bounds = useMemo(() => {
     if (cities.length === 0) return { minX: 0, minY: 0, width: 100, height: 100 };
     const xs = cities.map(c => c.x);
@@ -111,7 +110,6 @@ const MetricChart: React.FC<ChartProps> = ({ title, icon, data, unit, lowerIsBet
                   className="h-full rounded-full transition-all duration-500 ease-out relative"
                   style={{ width: `${percent}%`, backgroundColor: item.color }}
                 >
-                  {/* Shimmer effect */}
                   <div className="absolute inset-0 bg-white/20 skew-x-12 -translate-x-full animate-[shimmer_2s_infinite]"></div>
                 </div>
               </div>
@@ -128,13 +126,10 @@ const AnalysisModal: React.FC<AnalysisModalProps> = ({ isOpen, onClose, results,
 
   if (!isOpen) return null;
 
-  // Find the best algorithm (shortest distance)
   const sortedResults = [...results].sort((a, b) => a.distance - b.distance);
   const winner = sortedResults[0];
 
-  // Helper to get translated name using enum values
   const getAlgoName = (key: string) => {
-    // Backend now returns enum values (e.g., "NEAREST_NEIGHBOR")
     const algoKey = key as AlgorithmType;
     if (algoKey in AlgorithmType) {
       return t.algoNames[algoKey] ?? key;

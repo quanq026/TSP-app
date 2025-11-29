@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import Canvas from './components/Canvas';
 import ControlPanel from './components/ControlPanel';
 import AnalysisModal from './components/AnalysisModal';
+import SFCDebugPanel from './components/SFCDebugPanel';
 import { City, AlgorithmType, AnalysisResult, Language } from './types';
 import { translations } from './utils/translations';
 import { fetchRandomCities, solveTsp, analyzeAlgorithms } from './utils/api';
@@ -26,10 +27,14 @@ const App: React.FC = () => {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<AlgorithmType>(AlgorithmType.NEAREST_NEIGHBOR);
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
-  const [language, setLanguage] = useState<Language>('vi'); // Default to Vietnamese based on user language
+  const [language, setLanguage] = useState<Language>('vi');
   const [error, setError] = useState<string | null>(null);
 
-  // We store the calculated full path here to animate it step-by-step
+  const [isSFCDebugOpen, setIsSFCDebugOpen] = useState(false);
+  const [showHilbertCurve, setShowHilbertCurve] = useState(false);
+  const [showSFCOrder, setShowSFCOrder] = useState(false);
+  const [highlightedCityId, setHighlightedCityId] = useState<number | null>(null);
+
   const targetPathRef = useRef<number[]>([]);
   const timerRef = useRef<number | null>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -73,7 +78,6 @@ const App: React.FC = () => {
       try {
         const { width, height } = measureCanvas();
         const generated = await fetchRandomCities(count, width, height);
-        // Update counter to avoid ID collision with fetched cities
         const maxId = Math.max(...generated.map(c => c.id), cityIdCounter);
         cityIdCounter = maxId;
         setCities(generated);
@@ -138,7 +142,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Animation Loop
   useEffect(() => {
     if (!isRunning) return;
 
@@ -158,12 +161,12 @@ const App: React.FC = () => {
     timerRef.current = window.setTimeout(step, STEP_DELAY_MS);
 
     return clearTimer;
-  }, [isRunning, path, clearTimer]); // Dependency on path ensures subsequent steps
+  }, [isRunning, path, clearTimer]);
 
   return (
     <div className="flex flex-col lg:flex-row h-screen overflow-hidden" style={{ backgroundColor: theme.colors.base, color: theme.colors.text }}>
-      {/* Main Visualizer Area */}
-      <div className="flex-1 p-4 h-full flex flex-col">
+      {/* Canvas Area - fixed height on mobile, flex on desktop */}
+      <div className="h-[50vh] lg:h-full flex-1 p-2 lg:p-4 flex flex-col min-w-0">
         <div className="flex-1 relative rounded-xl overflow-hidden shadow-2xl" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.overlay}` }}>
           {/* Attach ref to this container to measure actual size */}
           <div ref={canvasContainerRef} className="absolute inset-0 p-4">
@@ -173,21 +176,25 @@ const App: React.FC = () => {
               onCanvasClick={handleCanvasClick}
               isRunning={isBusy}
               language={language}
+              showHilbertCurve={showHilbertCurve}
+              showSFCOrder={showSFCOrder}
+              highlightedCityId={highlightedCityId}
+              selectedAlgorithm={selectedAlgorithm}
             />
           </div>
 
-          <div className="absolute top-4 left-8 backdrop-blur px-4 py-2 rounded-lg text-xs pointer-events-none" style={{ backgroundColor: withOpacity(theme.colors.base, 0.8), border: `1px solid ${theme.colors.overlay}`, color: theme.colors.subtle }}>
+          <div className="absolute top-2 left-2 lg:top-4 lg:left-8 backdrop-blur-sm px-2 py-1 lg:px-4 lg:py-2 rounded-lg text-[10px] lg:text-xs pointer-events-none" style={{ backgroundColor: withOpacity(theme.colors.base, 0.5), border: `1px solid ${withOpacity(theme.colors.overlay, 0.1)}`, color: theme.colors.subtle }}>
             {t.algorithm}: <span className="font-bold" style={{ color: theme.colors.foam }}>{t.algoNames[selectedAlgorithm]}</span>
           </div>
 
           {/* Error Toast */}
           {error && (
             <div
-              className="absolute bottom-4 left-4 right-4 p-3 rounded-lg text-sm flex items-center justify-between cursor-pointer"
+              className="absolute bottom-2 left-2 right-2 lg:bottom-4 lg:left-4 lg:right-4 p-2 lg:p-3 rounded-lg text-xs lg:text-sm flex items-center justify-between cursor-pointer"
               style={{ backgroundColor: withOpacity(theme.colors.love, 0.9), color: theme.colors.text }}
               onClick={() => setError(null)}
             >
-              <span>⚠️ {error}</span>
+              ⚠️ {error}
               <span className="text-xs opacity-70">Click to dismiss</span>
             </div>
           )}
@@ -207,6 +214,11 @@ const App: React.FC = () => {
         cityCount={cities.length}
         totalDistance={getTotalDistance(cities, path)}
         language={language}
+        showHilbertCurve={showHilbertCurve}
+        showSFCOrder={showSFCOrder}
+        onToggleHilbertCurve={() => setShowHilbertCurve(!showHilbertCurve)}
+        onToggleSFCOrder={() => setShowSFCOrder(!showSFCOrder)}
+        onOpenSFCDebug={() => setIsSFCDebugOpen(true)}
       />
 
       {/* Analysis Modal */}
@@ -216,6 +228,16 @@ const App: React.FC = () => {
         results={analysisResults}
         cities={cities}
         language={language}
+      />
+
+      {/* SFC Debug Panel */}
+      <SFCDebugPanel
+        cities={cities}
+        language={language}
+        isVisible={isSFCDebugOpen}
+        onClose={() => setIsSFCDebugOpen(false)}
+        onHighlightCity={setHighlightedCityId}
+        currentStep={path.length - 1}
       />
     </div>
   );

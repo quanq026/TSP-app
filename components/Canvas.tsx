@@ -1,7 +1,8 @@
 import React, { useRef, useMemo } from 'react';
-import { City, Language } from '../types';
+import { City, Language, AlgorithmType } from '../types';
 import { translations } from '../utils/translations';
 import { theme, withOpacity } from '../utils/theme';
+import { generateHilbertCurvePoints, calculateSFCDebugInfo } from '../utils/hilbert';
 
 interface CanvasProps {
   cities: City[];
@@ -9,14 +10,38 @@ interface CanvasProps {
   onCanvasClick: (x: number, y: number) => void;
   isRunning: boolean;
   language: Language;
+  showHilbertCurve?: boolean;
+  showSFCOrder?: boolean;
+  highlightedCityId?: number | null;
+  selectedAlgorithm?: AlgorithmType;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning, language }) => {
+const Canvas: React.FC<CanvasProps> = ({
+  cities,
+  path,
+  onCanvasClick,
+  isRunning,
+  language,
+  showHilbertCurve = false,
+  showSFCOrder = false,
+  highlightedCityId = null,
+  selectedAlgorithm
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const t = translations[language];
 
-  // Performance: Create Map lookup once instead of O(n) find() per segment
   const cityMap = useMemo(() => new Map(cities.map(c => [c.id, c])), [cities]);
+
+  const hilbertCurvePoints = useMemo(() => {
+    if (!showHilbertCurve || !containerRef.current) return [];
+    const rect = containerRef.current.getBoundingClientRect();
+    return generateHilbertCurvePoints(rect.width, rect.height, 5);
+  }, [showHilbertCurve]);
+
+  const sfcDebugInfo = useMemo(() => {
+    if (selectedAlgorithm !== AlgorithmType.SPACE_FILLING_CURVE) return null;
+    return calculateSFCDebugInfo(cities);
+  }, [cities, selectedAlgorithm]);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isRunning) return;
@@ -36,6 +61,18 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
       style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.overlay}` }}
     >
       <svg className="w-full h-full pointer-events-none">
+        {/* Draw Hilbert Curve Background */}
+        {showHilbertCurve && hilbertCurvePoints.length > 1 && (
+          <path
+            d={`M ${hilbertCurvePoints.map(p => `${p.x},${p.y}`).join(' L ')}`}
+            fill="none"
+            stroke={theme.colors.gold}
+            strokeWidth="1.5"
+            opacity={0.6}
+            className="transition-opacity duration-500"
+          />
+        )}
+
         {/* Draw Path */}
         {path.length > 1 && path.map((cityId, index) => {
           if (index === path.length - 1) return null;
@@ -75,21 +112,61 @@ const Canvas: React.FC<CanvasProps> = ({ cities, path, onCanvasClick, isRunning,
           const isStart = path[0] === city.id;
           const isCurrent = path[path.length - 1] === city.id;
           const isVisited = path.includes(city.id);
+          const isHighlighted = highlightedCityId === city.id;
+
+          const sfcOrder = sfcDebugInfo?.find(info => info.cityId === city.id)?.order;
 
           return (
             <g key={city.id}>
+              {/* Highlight ring for hovered city */}
+              {isHighlighted && (
+                <circle
+                  cx={city.x}
+                  cy={city.y}
+                  r={14}
+                  fill="none"
+                  stroke={theme.colors.gold}
+                  strokeWidth="3"
+                  className="animate-pulse"
+                />
+              )}
               <circle
                 cx={city.x}
                 cy={city.y}
-                r={isCurrent ? 8 : 6}
+                r={isHighlighted ? 10 : isCurrent ? 8 : 6}
                 fill={isStart ? theme.colors.pine : isCurrent ? theme.colors.gold : isVisited ? theme.colors.foam : theme.colors.love}
                 className="transition-all duration-300"
               />
+              {/* Show SFC order when toggled */}
+              {showSFCOrder && sfcOrder !== undefined && selectedAlgorithm === AlgorithmType.SPACE_FILLING_CURVE && (
+                <g>
+                  <circle
+                    cx={city.x + 12}
+                    cy={city.y - 12}
+                    r={9}
+                    fill={theme.colors.iris}
+                    stroke={theme.colors.surface}
+                    strokeWidth="1"
+                  />
+                  <text
+                    x={city.x + 12}
+                    y={city.y - 8}
+                    fill={theme.colors.text}
+                    fontSize="9"
+                    fontWeight="bold"
+                    textAnchor="middle"
+                    className="pointer-events-none select-none"
+                  >
+                    {sfcOrder}
+                  </text>
+                </g>
+              )}
               <text
-                x={city.x + 10}
+                x={city.x + (showSFCOrder && sfcOrder !== undefined ? -12 : 10)}
                 y={city.y + 4}
                 fill={withOpacity(theme.colors.text, 0.7)}
                 fontSize="10"
+                textAnchor={showSFCOrder && sfcOrder !== undefined ? 'end' : 'start'}
                 className="pointer-events-none select-none"
               >
                 {index + 1}
