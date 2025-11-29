@@ -1,7 +1,7 @@
 import { AlgorithmType, AnalysisResult, City } from '../types';
 
-// const DEFAULT_API_URL = 'http://localhost:8000';
-// const API_BASE_URL = (import.meta as any)?.env?.VITE_API_URL ?? DEFAULT_API_URL;
+//const DEFAULT_API_URL = 'http://localhost:8000';
+//const API_BASE_URL = (import.meta as any)?.env?.VITE_API_URL ?? DEFAULT_API_URL;
 const API_BASE_URL = 'https://tsp-app.onrender.com';
 
 const withBase = (path: string) => {
