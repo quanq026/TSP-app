@@ -1,5 +1,0 @@
-{
-  "name": "TSP Visualizer",
-  "description": "A React application visualizing the Nearest Neighbor algorithm for the Traveling Salesperson Problem. Features interactive node placement and real-time path calculation.",
-  "requestFramePermissions": []
-}
