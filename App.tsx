@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+
 import Canvas from './components/Canvas';
 import ControlPanel from './components/ControlPanel';
 import AnalysisModal from './components/AnalysisModal';
@@ -20,6 +21,7 @@ let cityIdCounter = 0;
 const getNextCityId = () => ++cityIdCounter;
 
 const App: React.FC = () => {
+
   const [cities, setCities] = useState<City[]>([]);
   const [path, setPath] = useState<number[]>([]);
   const [isRunning, setIsRunning] = useState(false);
@@ -41,6 +43,41 @@ const App: React.FC = () => {
 
   const t = useMemo(() => translations[language], [language]);
   const isBusy = isRunning || isComputing;
+
+  // Sync scrollbar with the current theme palette
+  useEffect(() => {
+    const styleId = 'scrollbar-theme-style';
+    const css = `
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: ${withOpacity(theme.colors.base, 0.9)};
+      }
+      ::-webkit-scrollbar-thumb {
+        background: ${withOpacity(theme.colors.overlay, 0.9)};
+        border-radius: 999px;
+        border: 2px solid ${withOpacity(theme.colors.base, 0.9)};
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: ${withOpacity(theme.colors.iris, 0.9)};
+      }
+    `;
+
+    let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = styleId;
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = css;
+    document.body.style.scrollbarColor = `${theme.colors.overlay} ${theme.colors.base}`;
+
+    return () => {
+      document.body.style.removeProperty('scrollbar-color');
+      styleEl?.parentElement?.removeChild(styleEl);
+    };
+  }, []);
 
   const resetRunState = useCallback(() => {
     setPath([]);
