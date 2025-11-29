@@ -27,15 +27,13 @@ const App: React.FC = () => {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<AlgorithmType>(AlgorithmType.NEAREST_NEIGHBOR);
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
-  const [language, setLanguage] = useState<Language>('vi'); // Default to Vietnamese based on user language
+  const [language, setLanguage] = useState<Language>('vi');
   const [error, setError] = useState<string | null>(null);
 
-  // SFC Debug states
   const [isSFCDebugOpen, setIsSFCDebugOpen] = useState(false);
   const [showHilbertCurve, setShowHilbertCurve] = useState(false);
   const [highlightedCityId, setHighlightedCityId] = useState<number | null>(null);
 
-  // We store the calculated full path here to animate it step-by-step
   const targetPathRef = useRef<number[]>([]);
   const timerRef = useRef<number | null>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -79,7 +77,6 @@ const App: React.FC = () => {
       try {
         const { width, height } = measureCanvas();
         const generated = await fetchRandomCities(count, width, height);
-        // Update counter to avoid ID collision with fetched cities
         const maxId = Math.max(...generated.map(c => c.id), cityIdCounter);
         cityIdCounter = maxId;
         setCities(generated);
@@ -144,7 +141,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Animation Loop
   useEffect(() => {
     if (!isRunning) return;
 
@@ -164,11 +160,10 @@ const App: React.FC = () => {
     timerRef.current = window.setTimeout(step, STEP_DELAY_MS);
 
     return clearTimer;
-  }, [isRunning, path, clearTimer]); // Dependency on path ensures subsequent steps
+  }, [isRunning, path, clearTimer]);
 
   return (
     <div className="flex flex-col lg:flex-row h-screen overflow-hidden" style={{ backgroundColor: theme.colors.base, color: theme.colors.text }}>
-      {/* Main Visualizer Area */}
       <div className="flex-1 p-4 h-full flex flex-col">
         <div className="flex-1 relative rounded-xl overflow-hidden shadow-2xl" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.overlay}` }}>
           {/* Attach ref to this container to measure actual size */}

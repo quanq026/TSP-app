@@ -28,17 +28,14 @@ const Canvas: React.FC<CanvasProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const t = translations[language];
 
-  // Performance: Create Map lookup once instead of O(n) find() per segment
   const cityMap = useMemo(() => new Map(cities.map(c => [c.id, c])), [cities]);
 
-  // Generate Hilbert curve points for background visualization
   const hilbertCurvePoints = useMemo(() => {
     if (!showHilbertCurve || !containerRef.current) return [];
     const rect = containerRef.current.getBoundingClientRect();
-    return generateHilbertCurvePoints(rect.width, rect.height, 5); // 32x32 grid
+    return generateHilbertCurvePoints(rect.width, rect.height, 5);
   }, [showHilbertCurve]);
 
-  // Calculate SFC debug info for showing order labels
   const sfcDebugInfo = useMemo(() => {
     if (selectedAlgorithm !== AlgorithmType.SPACE_FILLING_CURVE) return null;
     return calculateSFCDebugInfo(cities);
@@ -114,7 +111,6 @@ const Canvas: React.FC<CanvasProps> = ({
           const isVisited = path.includes(city.id);
           const isHighlighted = highlightedCityId === city.id;
 
-          // Get SFC order for this city if in SFC mode
           const sfcOrder = sfcDebugInfo?.find(info => info.cityId === city.id)?.order;
 
           return (

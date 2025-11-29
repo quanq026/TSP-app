@@ -14,7 +14,6 @@ def solve_ant_colony(cities: List[City]) -> List[int]:
     if len(cities) < 2:
         return [city.id for city in cities]
 
-    # Filter out duplicate positions to avoid distance=0 issues
     seen_positions: set[tuple[float, float]] = set()
     unique_cities: List[City] = []
     for city in cities:
@@ -28,11 +27,10 @@ def solve_ant_colony(cities: List[City]) -> List[int]:
     
     cities = unique_cities
 
-    # Tunable parameters
-    num_ants = min(30, len(cities))   # Tăng số kiến
-    max_iterations = 150              # Tăng iterations để pheromone hội tụ tốt hơn
-    alpha = 1  # pheromone influence
-    beta = 3   # heuristic (distance) influence
+    num_ants = min(30, len(cities))
+    max_iterations = 150
+    alpha = 1
+    beta = 3
     evaporation = 0.1
     q = 100
 
@@ -67,7 +65,6 @@ def solve_ant_colony(cities: List[City]) -> List[int]:
                 continue
             tau = pheromones[current][next_city] ** alpha
             distance = dists[current][next_city]
-            # Avoid division by zero for overlapping points
             eta = (1.0 / max(distance, 0.001)) ** beta
             probability = tau * eta
             candidates.append(next_city)

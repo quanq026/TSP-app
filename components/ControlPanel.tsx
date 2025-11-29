@@ -31,12 +31,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   totalDistance,
   language
 }) => {
-  // Use string state to allow empty input during typing
   const [inputValue, setInputValue] = useState<string>("30");
   const t = translations[language];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Allow digits and empty string
     const val = e.target.value;
     if (val === '' || /^\d+$/.test(val)) {
       setInputValue(val);
@@ -44,7 +42,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   const handleBlur = () => {
-    // Validate on blur
     let num = parseInt(inputValue, 10);
     if (isNaN(num) || num < 3) num = 3;
     if (num > 500) num = 500;
@@ -56,7 +53,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     if (isNaN(num) || num < 3) num = 3;
     if (num > 500) num = 500;
 
-    // Update input if it was corrected
     setInputValue(num.toString());
     onRandomize(num);
   };
