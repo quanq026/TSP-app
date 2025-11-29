@@ -80,15 +80,17 @@ const SFCDebugPanel: React.FC<SFCDebugPanelProps> = ({
     };
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-2 lg:p-4"
-            style={{ backgroundColor: withOpacity(theme.colors.base, 0.8) }}
-            onClick={onClose}
-        >
+        <>
+            {/* Backdrop - only on mobile, covers top half */}
             <div
-                className="w-full max-w-4xl h-full lg:h-auto lg:max-h-[90vh] rounded-xl overflow-hidden shadow-2xl flex flex-col"
-                style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.overlay}` }}
-                onClick={e => e.stopPropagation()}
+                className="fixed inset-x-0 top-0 h-[50vh] z-40 lg:hidden"
+                style={{ backgroundColor: withOpacity(theme.colors.base, 0.3) }}
+                onClick={onClose}
+            />
+            {/* Panel - bottom half on mobile, sidebar overlay on desktop */}
+            <div
+                className="fixed inset-x-0 bottom-0 h-[50vh] lg:inset-auto lg:right-0 lg:top-0 lg:bottom-0 lg:h-full lg:w-96 xl:w-[420px] z-50 flex flex-col rounded-t-xl lg:rounded-none"
+                style={{ backgroundColor: theme.colors.surface, borderTop: `1px solid ${theme.colors.overlay}`, borderLeft: `1px solid ${theme.colors.overlay}` }}
             >
                 {/* Header */}
                 <div className="p-3 lg:p-4 border-b" style={{ borderColor: theme.colors.overlay }}>
@@ -210,7 +212,7 @@ const SFCDebugPanel: React.FC<SFCDebugPanelProps> = ({
                     </p>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
