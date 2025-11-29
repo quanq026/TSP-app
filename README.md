@@ -2,7 +2,7 @@
 
 Ứng dụng trực quan hóa và so sánh các thuật toán giải bài toán Người bán hàng (Traveling Salesman Problem).
 
-**Demo:** [https://tsp-visualizer-quanq026.vercel.app/](https://tsp-visualizer-quanq026.vercel.app/)
+**Demo:** [https://tsp-visualizer-quanq026.vercel.app](https://tsp-visualizer-quanq026.vercel.app)
 
 ## Tech Stack
 
