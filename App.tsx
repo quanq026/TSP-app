@@ -6,7 +6,7 @@ import AnalysisModal from './components/AnalysisModal';
 import SFCDebugPanel from './components/SFCDebugPanel';
 import { City, AlgorithmType, AnalysisResult, Language } from './types';
 import { translations } from './utils/translations';
-import { fetchRandomCities, solveTsp, analyzeAlgorithms } from './utils/api';
+import { fetchRandomCities, solveTsp, analyzeAlgorithms, checkBackendHealth } from './utils/api';
 import { getTotalDistance } from './utils/geometry';
 import { theme, withOpacity } from './utils/theme';
 
@@ -19,6 +19,8 @@ const ensureMinDimension = (value: number) => Math.max(value, MIN_DIMENSION);
 // Counter for unique city IDs (avoids Date.now() collision on rapid clicks)
 let cityIdCounter = 0;
 const getNextCityId = () => ++cityIdCounter;
+
+type BackendStatus = 'connecting' | 'ready' | 'offline';
 
 const App: React.FC = () => {
 
@@ -36,6 +38,7 @@ const App: React.FC = () => {
   const [showHilbertCurve, setShowHilbertCurve] = useState(false);
   const [showSFCOrder, setShowSFCOrder] = useState(false);
   const [highlightedCityId, setHighlightedCityId] = useState<number | null>(null);
+  const [backendStatus, setBackendStatus] = useState<BackendStatus>('connecting');
 
   const targetPathRef = useRef<number[]>([]);
   const timerRef = useRef<number | null>(null);
@@ -76,6 +79,34 @@ const App: React.FC = () => {
     return () => {
       document.body.style.removeProperty('scrollbar-color');
       styleEl?.parentElement?.removeChild(styleEl);
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    let retryTimeout: number | null = null;
+
+    const pingBackend = async () => {
+      if (!isMounted) return;
+      setBackendStatus(prev => (prev === 'ready' ? prev : 'connecting'));
+      try {
+        await checkBackendHealth();
+        if (!isMounted) return;
+        setBackendStatus('ready');
+      } catch (err) {
+        if (!isMounted) return;
+        setBackendStatus('offline');
+        retryTimeout = window.setTimeout(pingBackend, 10000);
+      }
+    };
+
+    pingBackend();
+
+    return () => {
+      isMounted = false;
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
+      }
     };
   }, []);
 
@@ -220,8 +251,26 @@ const App: React.FC = () => {
             />
           </div>
 
-          <div className="absolute top-2 left-2 lg:top-4 lg:left-8 backdrop-blur-sm px-2 py-1 lg:px-4 lg:py-2 rounded-lg text-[10px] lg:text-xs pointer-events-none" style={{ backgroundColor: withOpacity(theme.colors.base, 0.5), border: `1px solid ${withOpacity(theme.colors.overlay, 0.1)}`, color: theme.colors.subtle }}>
-            {t.algorithm}: <span className="font-bold" style={{ color: theme.colors.foam }}>{t.algoNames[selectedAlgorithm]}</span>
+          <div className="absolute top-2 left-2 lg:top-4 lg:left-8 flex flex-col gap-1 pointer-events-none">
+            <div className="backdrop-blur-sm px-2 py-1 lg:px-4 lg:py-2 rounded-lg text-[10px] lg:text-xs" style={{ backgroundColor: withOpacity(theme.colors.base, 0.5), border: `1px solid ${withOpacity(theme.colors.overlay, 0.1)}`, color: theme.colors.subtle }}>
+              {t.algorithm}: <span className="font-bold" style={{ color: theme.colors.foam }}>{t.algoNames[selectedAlgorithm]}</span>
+            </div>
+            <div
+              className="inline-flex items-center gap-2 px-2 py-1 rounded-lg text-[10px] lg:text-xs"
+              style={{
+                backgroundColor: withOpacity(theme.colors.overlay, 0.6),
+                border: `1px solid ${withOpacity(theme.colors.overlay, 0.9)}`,
+                color: backendStatus === 'ready' ? theme.colors.foam : backendStatus === 'connecting' ? theme.colors.gold : theme.colors.love
+              }}
+            >
+              <span className="inline-block w-2 h-2 rounded-full"
+                style={{
+                  backgroundColor: backendStatus === 'ready' ? theme.colors.foam : backendStatus === 'connecting' ? theme.colors.gold : theme.colors.love,
+                  boxShadow: `0 0 6px ${withOpacity(backendStatus === 'ready' ? theme.colors.foam : backendStatus === 'connecting' ? theme.colors.gold : theme.colors.love, 0.8)}`
+                }}
+              />
+              {backendStatus === 'ready' ? 'Backend: Ready' : backendStatus === 'connecting' ? 'Backend: Waking up…' : 'Backend: Offline, retrying'}
+            </div>
           </div>
 
           {/* Error Toast */}

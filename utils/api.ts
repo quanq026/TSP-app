@@ -7,6 +7,16 @@ const withBase = (path: string) => {
     return `${API_BASE_URL}${normalized}`;
 };
 
+export const checkBackendHealth = async (): Promise<boolean> => {
+    try {
+        const response = await fetch(withBase('/health'), { method: 'GET' });
+        await handleResponse<{ status: string }>(response);
+        return true;
+    } catch {
+        throw new Error('Backend unreachable');
+    }
+};
+
 const handleResponse = async <T>(response: Response): Promise<T> => {
     if (!response.ok) {
         const message = await response.text();
