@@ -15,7 +15,7 @@ interface SFCDebugPanelProps {
 const translations = {
     en: {
         title: '🔍 SFC Debug Panel',
-        subtitle: 'Understanding How Space Filling Curve Works',
+        subtitle: 'Understanding How Space Filling Curve',
         step1Title: 'Step 1: Normalize Coordinates',
         step1Desc: 'Convert canvas coordinates to a 4096×4096 grid',
         step2Title: 'Step 2: Calculate Hilbert Key',
@@ -38,7 +38,7 @@ const translations = {
     },
     vi: {
         title: '🔍 Debug Panel SFC',
-        subtitle: 'Hiểu cách thuật toán Đường Điền Đầy hoạt động',
+        subtitle: 'Debug cách hoạt động SFC',
         step1Title: 'Chuẩn hóa tọa độ',
         step1Desc: 'Chuyển tọa độ canvas sang lưới 4096×4096',
         step2Title: 'Tính Hilbert Key',
