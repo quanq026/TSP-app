@@ -160,23 +160,23 @@ const SFCDebugPanel: React.FC<SFCDebugPanelProps> = ({
                                         className="text-left p-2 sticky top-0 z-10"
                                         style={{
                                             backgroundColor: withOpacity(theme.colors.surface, 0.95),
-                                            boxShadow: `0 2px 6px ${withOpacity(theme.colors.base, 0.7)}`,
+                                            borderBottom: `1px solid ${withOpacity(theme.colors.overlay, 0.4)}`,
                                             textTransform: 'uppercase',
                                             letterSpacing: '0.05em'
                                         }}
                                     >
                                         {t.tableHeaders.order}
                                     </th>
-                                    <th className="text-left p-2 sticky top-0 z-10" style={{ backgroundColor: withOpacity(theme.colors.surface, 0.95) }}>
+                                    <th className="text-left p-2 sticky top-0 z-10" style={{ backgroundColor: withOpacity(theme.colors.surface, 0.95), borderBottom: `1px solid ${withOpacity(theme.colors.overlay, 0.4)}` }}>
                                         {t.tableHeaders.city}
                                     </th>
-                                    <th className="text-left p-2 sticky top-0 hidden sm:table-cell z-10" style={{ backgroundColor: withOpacity(theme.colors.surface, 0.95) }}>
+                                    <th className="text-left p-2 sticky top-0 hidden sm:table-cell z-10" style={{ backgroundColor: withOpacity(theme.colors.surface, 0.95), borderBottom: `1px solid ${withOpacity(theme.colors.overlay, 0.4)}` }}>
                                         {t.tableHeaders.original}
                                     </th>
-                                    <th className="text-left p-2 sticky top-0 hidden lg:table-cell z-10" style={{ backgroundColor: withOpacity(theme.colors.surface, 0.95) }}>
+                                    <th className="text-left p-2 sticky top-0 hidden lg:table-cell z-10" style={{ backgroundColor: withOpacity(theme.colors.surface, 0.95), borderBottom: `1px solid ${withOpacity(theme.colors.overlay, 0.4)}` }}>
                                         {t.tableHeaders.normalized}
                                     </th>
-                                    <th className="text-right p-2 sticky top-0 z-10" style={{ backgroundColor: withOpacity(theme.colors.surface, 0.95) }}>
+                                    <th className="text-right p-2 sticky top-0 z-10" style={{ backgroundColor: withOpacity(theme.colors.surface, 0.95), borderBottom: `1px solid ${withOpacity(theme.colors.overlay, 0.4)}` }}>
                                         {t.tableHeaders.hilbertKey}
                                     </th>
                                 </tr>
