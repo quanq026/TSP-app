@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import Canvas from './components/Canvas';
 import ControlPanel from './components/ControlPanel';
 import AnalysisModal from './components/AnalysisModal';
+import SFCDebugPanel from './components/SFCDebugPanel';
 import { City, AlgorithmType, AnalysisResult, Language } from './types';
 import { translations } from './utils/translations';
 import { fetchRandomCities, solveTsp, analyzeAlgorithms } from './utils/api';
@@ -28,6 +29,11 @@ const App: React.FC = () => {
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
   const [language, setLanguage] = useState<Language>('vi'); // Default to Vietnamese based on user language
   const [error, setError] = useState<string | null>(null);
+
+  // SFC Debug states
+  const [isSFCDebugOpen, setIsSFCDebugOpen] = useState(false);
+  const [showHilbertCurve, setShowHilbertCurve] = useState(false);
+  const [highlightedCityId, setHighlightedCityId] = useState<number | null>(null);
 
   // We store the calculated full path here to animate it step-by-step
   const targetPathRef = useRef<number[]>([]);
@@ -173,12 +179,43 @@ const App: React.FC = () => {
               onCanvasClick={handleCanvasClick}
               isRunning={isBusy}
               language={language}
+              showHilbertCurve={showHilbertCurve}
+              highlightedCityId={highlightedCityId}
+              selectedAlgorithm={selectedAlgorithm}
             />
           </div>
 
           <div className="absolute top-4 left-8 backdrop-blur px-4 py-2 rounded-lg text-xs pointer-events-none" style={{ backgroundColor: withOpacity(theme.colors.base, 0.8), border: `1px solid ${theme.colors.overlay}`, color: theme.colors.subtle }}>
             {t.algorithm}: <span className="font-bold" style={{ color: theme.colors.foam }}>{t.algoNames[selectedAlgorithm]}</span>
           </div>
+
+          {/* SFC Debug Button */}
+          {selectedAlgorithm === AlgorithmType.SPACE_FILLING_CURVE && cities.length >= 2 && (
+            <div className="absolute top-4 right-8 flex gap-2">
+              <button
+                onClick={() => setShowHilbertCurve(!showHilbertCurve)}
+                className="backdrop-blur px-3 py-2 rounded-lg text-xs cursor-pointer transition-all hover:scale-105"
+                style={{
+                  backgroundColor: showHilbertCurve ? withOpacity(theme.colors.iris, 0.8) : withOpacity(theme.colors.base, 0.8),
+                  border: `1px solid ${theme.colors.overlay}`,
+                  color: theme.colors.text
+                }}
+              >
+                {showHilbertCurve ? '🌀 Ẩn Hilbert' : '🌀 Hiện Hilbert'}
+              </button>
+              <button
+                onClick={() => setIsSFCDebugOpen(true)}
+                className="backdrop-blur px-3 py-2 rounded-lg text-xs cursor-pointer transition-all hover:scale-105"
+                style={{
+                  backgroundColor: withOpacity(theme.colors.pine, 0.8),
+                  border: `1px solid ${theme.colors.overlay}`,
+                  color: theme.colors.text
+                }}
+              >
+                🔍 Debug SFC
+              </button>
+            </div>
+          )}
 
           {/* Error Toast */}
           {error && (
@@ -216,6 +253,16 @@ const App: React.FC = () => {
         results={analysisResults}
         cities={cities}
         language={language}
+      />
+
+      {/* SFC Debug Panel */}
+      <SFCDebugPanel
+        cities={cities}
+        language={language}
+        isVisible={isSFCDebugOpen}
+        onClose={() => setIsSFCDebugOpen(false)}
+        onHighlightCity={setHighlightedCityId}
+        currentStep={path.length - 1}
       />
     </div>
   );

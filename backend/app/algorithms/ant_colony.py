@@ -29,8 +29,8 @@ def solve_ant_colony(cities: List[City]) -> List[int]:
     cities = unique_cities
 
     # Tunable parameters
-    num_ants = min(20, len(cities))   # Tăng số kiến
-    max_iterations = 100              # Tăng iterations để pheromone hội tụ tốt hơn
+    num_ants = min(30, len(cities))   # Tăng số kiến
+    max_iterations = 150              # Tăng iterations để pheromone hội tụ tốt hơn
     alpha = 1  # pheromone influence
     beta = 3   # heuristic (distance) influence
     evaporation = 0.1

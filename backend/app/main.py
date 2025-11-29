@@ -52,7 +52,7 @@ ALGORITHM_LABELS = {
 # ACO is stochastic - run a few times with different random seeds and keep best
 # Note: Main optimization happens INSIDE ACO (150 iterations with pheromone accumulation)
 # These runs are for different random starting points only
-ACO_RUNS = 2
+ACO_RUNS = 3
 
 
 @app.get("/health")
