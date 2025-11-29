@@ -202,6 +202,53 @@ def space_filling_curve_hilbert(cities):
     pass
 ```
 
+### Thành phố xuất phát vs điểm Hilbert đầu tiên
+
+Trong backend hiện tại (`backend/app/algorithms/space_filling_curve.py`), pipeline Hilbert đang làm việc theo hai bước tách biệt:
+
+1. **Thứ tự Hilbert thuần**
+   ```python
+   enriched.sort(key=lambda item: item[0])
+   path = [city_id for _, city_id in enriched]
+   ```
+   - `enriched` chứa `(hilbert_value, city.id)` cho từng thành phố.
+   - Sau khi `sort`, `path` chính là **thứ tự gốc của đường Hilbert** (điểm nào có `hilbert_value` nhỏ hơn được đi trước).
+
+2. **Chuẩn hóa (normalize) để khớp thành phố xuất phát**
+   ```python
+   return normalize_path(path, cities[0].id)
+   ```
+   Hàm `normalize_path` xoay vòng (rotate) mảng `path` sao cho phần tử đầu tiên đúng bằng `start_id` (ở đây là `cities[0].id`):
+   ```python
+   def normalize_path(path: List[int], start_id: int) -> List[int]:
+       if not path:
+           return path
+       try:
+           index = path.index(start_id)
+       except ValueError:
+           return path
+       if index == 0:
+           return path
+       return path[index:] + path[:index]
+   ```
+
+**Ý nghĩa:**
+
+- Đường Hilbert thuần quyết định **thứ tự tương đối** giữa các thành phố (ai trước ai sau).
+- Nếu điểm Hilbert đầu tiên **không** trùng với thành phố xuất phát mong muốn (mặc định là `cities[0]`), ta **không thay đổi thứ tự tương đối**, mà chỉ **xoay vòng** để tour bắt đầu từ thành phố mong muốn.
+
+Ví dụ:
+
+- Thứ tự Hilbert gốc: `[5, 2, 7, 3, 1]`
+- Thành phố xuất phát: `start_id = 3`
+- Sau `normalize_path` → `[3, 1, 5, 2, 7]`
+
+Như vậy:
+- Tính chất locality của Hilbert được giữ nguyên.
+- Tour vẫn là một vòng khép kín đơn giản, chỉ khác **điểm ta gọi là "bắt đầu"**.
+
+Nếu muốn cho phép user chọn thành phố xuất phát tùy ý, chỉ cần truyền `start_id` tương ứng xuống backend và dùng lại cùng cơ chế `normalize_path` này.
+
 ---
 
 ## 📊 So Sánh Hiệu Năng
