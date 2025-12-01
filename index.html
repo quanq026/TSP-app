@@ -11,25 +11,6 @@
     body {
       font-family: 'Inter', sans-serif;
     }
-
-    /* Safe area padding for mobile browsers with bottom navigation bar */
-    .safe-area-bottom {
-      padding-bottom: 80px;
-      /* Fallback for browsers without safe-area support */
-    }
-
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      .safe-area-bottom {
-        padding-bottom: calc(80px + env(safe-area-inset-bottom));
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .safe-area-bottom {
-        padding-bottom: 20px;
-        /* Reset for desktop */
-      }
-    }
   </style>
   <script type="importmap">
 {

@@ -232,9 +232,9 @@ const App: React.FC = () => {
   }, [isRunning, path, clearTimer]);
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen lg:h-screen overflow-auto lg:overflow-hidden" style={{ backgroundColor: theme.colors.base, color: theme.colors.text }}>
+    <div className="flex flex-col lg:flex-row h-screen overflow-hidden" style={{ backgroundColor: theme.colors.base, color: theme.colors.text }}>
       {/* Canvas Area - fixed height on mobile, flex on desktop */}
-      <div className="h-[45vh] lg:h-full flex-1 p-2 lg:p-4 flex flex-col min-w-0 shrink-0">
+      <div className="h-[50vh] lg:h-full flex-1 p-2 lg:p-4 flex flex-col min-w-0">
         <div className="flex-1 relative rounded-xl overflow-hidden shadow-2xl" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.overlay}` }}>
           {/* Attach ref to this container to measure actual size */}
           <div ref={canvasContainerRef} className="absolute inset-0 p-4">
