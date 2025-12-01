@@ -69,7 +69,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   return (
-    <div className="w-full lg:w-72 xl:w-80 p-3 lg:p-5 flex flex-col gap-3 lg:gap-4 flex-1 lg:flex-none lg:h-full overflow-y-auto shrink-0 safe-area-bottom" style={{ backgroundColor: theme.colors.surface, borderTop: `1px solid ${theme.colors.overlay}` }}>
+    <div className="w-full lg:w-72 xl:w-80 p-3 lg:p-5 flex flex-col gap-3 lg:gap-4 lg:h-full lg:overflow-y-auto shrink-0 safe-area-bottom" style={{ backgroundColor: theme.colors.surface, borderTop: `1px solid ${theme.colors.overlay}` }}>
       {/* Sidebar: full width on mobile, fixed width on desktop */}
       <div className="flex justify-between items-start">
         <div>
