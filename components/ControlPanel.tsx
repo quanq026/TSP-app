@@ -258,7 +258,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       </div>
 
       {/* Spacer for mobile browser bottom bar */}
-      <div className="h-20 shrink-0 lg:hidden" aria-hidden="true" />
+      <div className="h-40 shrink-0 lg:hidden" aria-hidden="true" />
     </div>
   );
 };
