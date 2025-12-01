@@ -1,16 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TSP Nearest Neighbor Visualizer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>TSP Nearest Neighbor Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Safe area padding for mobile browsers with bottom navigation bar */
+    .safe-area-bottom {
+      padding-bottom: 80px;
+      /* Fallback for browsers without safe-area support */
+    }
+
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      .safe-area-bottom {
+        padding-bottom: calc(80px + env(safe-area-inset-bottom));
       }
-    </style>
+    }
+
+    @media (min-width: 1024px) {
+      .safe-area-bottom {
+        padding-bottom: 20px;
+        /* Reset for desktop */
+      }
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -22,10 +42,12 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-slate-900 text-white overflow-hidden">
-    <div id="root"></div>
+
+<body class="bg-slate-900 text-white overflow-hidden">
+  <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>
